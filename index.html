@@ -1,108 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PXFX Ads Pro</title>
+    <style>
+        /* Reset & basic styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
-  <script src="https://pxfxads.abdstudiox.site/assets/ads/ad.js" class="adScriptClass"></script>
-  <meta charset="UTF-8">
-  <title>My Single File Website</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-      color: #333;
-    }
-    header {
-      background: #4CAF50;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    nav {
-      background: #333;
-      padding: 10px;
-      text-align: center;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin: 0 15px;
-      font-weight: bold;
-    }
-    nav a:hover {
-      color: #4CAF50;
-    }
-    main {
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      margin: 15px 0;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    button {
-      background: #4CAF50;
-      border: none;
-      padding: 10px 20px;
-      color: white;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    footer {
-      text-align: center;
-      padding: 15px;
-      background: #333;
-      color: white;
-      position: fixed;
-      width: 100%;
-      bottom: 0;
-    }
-  </style>
+        body {
+            background: linear-gradient(to bottom, #f2f2f2, #e6e6e6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px; /* Ideal for 1080x1920 scaled on desktop/mobile */
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        p {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        /* Advertisement box styling */
+        .MainAdverTiseMentDiv {
+            width: 100%;
+            height: auto;
+            min-height: 600px;
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #999;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Footer style */
+        footer {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>🌐 My Website</h1>
-    <p>Single HTML, CSS, JS file</p>
-  </header>
+    <div class="container">
+        <h1>💰 Earn Free PXFX!</h1>
+        <p>Complete daily tasks and watch your rewards grow.</p>
 
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-  </nav>
+        <!-- Advertisement Div -->
+        <div class="MainAdverTiseMentDiv" 
+             data-publisher="eyJpdiI6IlVPQms2RjJWYm1TTDczeGtjWi9sSnc9PSIsInZhbHVlIjoiRTlvNzZWTGd3T2kySjRkalhCMmRCUT09IiwibWFjIjoiYmMyMDIwN2JmYzMwMDNjZDBhNDBiNzhjNTBjZGYwNDc4OGY5ZTM4NGNhODgzNTc4ZDEwN2Y2YmNhMmQ2YjM3NyIsInRhZyI6IiJ9" 
+             data-adsize="1080x1920">
+             Loading Ads...
+        </div>
 
-  <main>
-    <section class="card" id="home">
-      <h2>Welcome</h2>
-      <p>This is a demo website built with only one HTML file that includes CSS and JavaScript.</p>
-      <button onclick="showAlert()">Click Me</button>
-    </section>
+        <!-- Advertisement Script -->
+        <script src="https://pxfxads.abdstudiox.site/assets/ads/ad.js" class="adScriptClass"></script>
 
-    <section class="card" id="about">
-      <h2>About</h2>
-      <p>This website has inline CSS for styling and inline JS for functionality. No external files needed!</p>
-    </section>
-
-    <section class="card" id="contact">
-      <h2>Contact</h2>
-      <p>Email: <a href="mailto:example@email.com">example@email.com</a></p>
-    </section>
-  </main>
-
-  <footer>
-    <p>© 2025 My Website. All rights reserved.</p>
-  </footer>
-  
-    function showAlert() {
-      alert("Hello! 👋 This is a JavaScript alert.");
-    }
-  </script>
+        <footer>© 2025 PXFX Ads Network</footer>
+    </div>
 </body>
 </html>
