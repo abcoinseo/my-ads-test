@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Single File Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    nav {
+      background: #333;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    nav a:hover {
+      color: #4CAF50;
+    }
+    main {
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #4CAF50;
+      border: none;
+      padding: 10px 20px;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #333;
+      color: white;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌐 My Website</h1>
+    <p>Single HTML, CSS, JS file</p>
+  </header>
+
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <main>
+    <section class="card" id="home">
+      <h2>Welcome</h2>
+      <p>This is a demo website built with only one HTML file that includes CSS and JavaScript.</p>
+      <button onclick="showAlert()">Click Me</button>
+    </section>
+
+    <section class="card" id="about">
+      <h2>About</h2>
+      <p>This website has inline CSS for styling and inline JS for functionality. No external files needed!</p>
+    </section>
+
+    <section class="card" id="contact">
+      <h2>Contact</h2>
+      <p>Email: <a href="mailto:example@email.com">example@email.com</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 My Website. All rights reserved.</p>
+  </footer>
+
+  <script>
+    function showAlert() {
+      alert("Hello! 👋 This is a JavaScript alert.");
+    }
+  </script>
+</body>
+</html>
