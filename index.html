@@ -3,100 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AdsBitvex Responsive Site</title>
+<title>Sticky Ad Example</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #f4f4f4;
-    color: #333;
-  }
-
-  header {
-    background-color: #1a1a1a;
-    color: #fff;
-    text-align: center;
-    padding: 20px 10px;
-    font-size: 1.5rem;
-  }
-
-  main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 10px;
-    gap: 30px;
-  }
-
-  .content {
-    background-color: #fff;
-    max-width: 1200px;
-    width: 100%;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  /* Sticky ad container */
+  .sticky-ad {
+    position: fixed;
+    bottom: 0; /* stick at bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 360px; /* default ad width */
+    max-width: 100%; /* responsive */
+    z-index: 9999;
+    background: transparent;
     text-align: center;
   }
 
-  /* Wrapper for AdsBitvex ad to keep system intact but responsive */
-  .ad-wrapper {
-    width: 100%;
-    max-width: 728px; /* desktop ad size */
-    margin: 20px auto;
-    display: flex;
-    justify-content: center;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  }
-
-  /* Let the ad system control its internal layout fully */
-  .ad-wrapper .MainAdverTiseMentDiv {
-    width: 100%;
-    height: auto;
-    min-height: 90px; /* maintain minimum height */
-  }
-
-  footer {
-    background-color: #1a1a1a;
-    color: #fff;
-    text-align: center;
-    padding: 15px 10px;
-    font-size: 0.9rem;
-  }
-
-  /* Mobile responsiveness */
-  @media (max-width: 768px) {
-    .ad-wrapper {
-      max-width: 100%;
+  /* Responsive adjustments for smaller screens */
+  @media screen and (max-width: 400px) {
+    .sticky-ad {
+      width: 100%; /* full width on mobile */
+      padding: 0 5px;
     }
+  }
+
+  /* Optional: smooth slide-up effect */
+  .sticky-ad.show {
+    animation: slideUp 0.5s ease forwards;
+  }
+
+  @keyframes slideUp {
+    from { transform: translate(-50%, 100%); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  AdsBitvex Responsive Ad Layout
-</header>
+<div style="height:2000px; padding:20px;">
+  <h1>Scroll down to see the sticky ad</h1>
+  <p>Example page content...</p>
+</div>
 
-<main>
-  <div class="content">
-    <h2>Professional Responsive Ads</h2>
-    <p>This container keeps the AdsBitvex ad system exactly as it is while being fully responsive and professional.</p>
-
-    <!-- Ad Wrapper -->
-    <div class="ad-wrapper">
-      <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IkJZMW9mZlRWMEZnVm50MXJHYUZoNVE9PSIsInZhbHVlIjoic2ZuWlRmc0NIOVE3Y0NNNEtRZGczQT09IiwibWFjIjoiOGZmYTgwYTRiYzQzNjdkYzFlOGNkYmMzNzYzNWMwNjRiMTAzNGU3ZTBmOTk2NTE4ZTNlMTY1Mzk1ZmI1Yjk2ZiIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-    </div>
-
+<!-- Sticky Ad -->
+<div class="sticky-ad show">
+  <div class='MainAdverTiseMentDiv'
+       data-publisher="eyJpdiI6IlBWUkcyc2dqeGVFU2VTazNjTW14cHc9PSIsInZhbHVlIjoiK0g2VnZjdFlneDM2elNsdXFrNVpKZz09IiwibWFjIjoiMTU3ZWI2YThjNWRmN2QyZTcxZWI2ZDUyOTRmZTkxMWJhN2NlMzM2MzgwNDZlZTUxMmU1NzJjNTg1ZjAwNjAwMiIsInRhZyI6IiJ9"
+       data-adsize="360x640">
   </div>
-</main>
+</div>
 
-<footer>
-  &copy; 2025 AdsBitvex Website. All Rights Reserved.
-</footer>
-
-<!-- Keep AdsBitvex script exactly as is -->
+<!-- Optional: Ads Script -->
 <script src="https://adsbitvex.site/assets/ads/ad.js" class="adScriptClass"></script>
 
 </body>
