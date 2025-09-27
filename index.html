@@ -112,46 +112,69 @@
     footer {background:#1f1f1f; color:#fff; text-align:center; padding:20px;}
 
     /* --- Responsive Ad Styles --- */
+
+    /* Style for the ad container itself */
     .MainAdverTiseMentDiv {
-      margin: 20px auto; /* Center the ad div */
-      text-align: center; /* Center content within the div */
-      background-color: #eee; /* Optional: background to see the div bounds */
-      display: flex; /* Use flex to help center the ad if it's smaller than container */
+      margin: 20px auto; /* Center the ad block horizontally */
+      text-align: center; /* Center inline content */
+      display: flex; /* Use flex to help center the ad content */
       justify-content: center;
       align-items: center;
+      background-color: #f0f0f0; /* Optional: helps visualize the container */
+      overflow: hidden; /* Crucial to prevent overflow */
+      box-sizing: border-box; /* Include padding/border in element's total width/height */
       /* Default for larger screens */
-      max-width: 728px; /* Max width for desktop */
-      height: 90px; /* Default height */
-      overflow: hidden; /* Hide anything that might overflow */
+      max-width: 728px; /* Max width on desktop */
+      height: 90px; /* Standard height */
     }
 
-    /* Media query for mobile devices */
+    /* For desktop and larger screens, we ensure it fits nicely */
+    @media (min-width: 769px) {
+      .MainAdverTiseMentDiv {
+        /* These are already set above, but explicitly stating here for clarity */
+        max-width: 728px;
+        height: 90px;
+      }
+    }
+
+    /* For mobile and smaller screens */
     @media (max-width: 768px) {
       .MainAdverTiseMentDiv {
-        width: 100%; /* Take full width on mobile */
-        max-width: 100%; /* Remove max-width constraint */
-        height: auto; /* Auto height to accommodate scaled ad */
-        padding: 0 10px; /* Add some padding for very small screens */
-        box-sizing: border-box;
+        width: 95%; /* Use a significant portion of the screen width */
+        max-width: 95%; /* Ensure it doesn't exceed available space */
+        /* Adjust height if the ad scales down, but aim to keep its presence */
+        height: auto; /* Allow height to adjust based on scaled content */
+        min-height: 90px; /* Ensure it has at least a decent minimum height */
+        padding: 0 5px; /* Slight padding on the sides */
+        box-sizing: border-box; /* Ensure padding doesn't add to the width */
+        /* The magic happens below: making the ad *inside* the div scale */
       }
 
-      /* Crucially, we need to instruct the ad itself to scale down if possible.
-         This part depends heavily on the ad script. If the script doesn't
-         automatically scale or provide mobile-specific sizes, you might
-         need to manually inject smaller ad units for mobile.
-         For now, we assume the ad script tries to fit. */
-    }
+      /*
+       * This is the key part: we need to tell the *content* of the ad
+       * (likely an iframe) to scale. This requires knowing the ad's
+       * intrinsic size and applying a transform.
+       *
+       * IMPORTANT: This is a common technique, but it might not work perfectly
+       * with all ad scripts. The ad script might overwrite styles, or the
+       * scaled content could become unreadable.
+       */
+      .MainAdverTiseMentDiv > * { /* Targets direct children like iframes */
+        transform: scale(0.8); /* Scale down the ad content by 20% */
+        transform-origin: center top; /* Scale from the top-center */
+        /* You might need to adjust this scale value (e.g., 0.7, 0.75, 0.9)
+           to find the best balance between size and readability on mobile. */
+      }
 
-    /* Ad Script Specifics (if applicable) */
-    /* If the ad script uses iframes or specific classes for the ad itself,
-       you might need to style those too. For example: */
-    /*
-    .MainAdverTiseMentDiv iframe {
-      max-width: 100%;
-      height: auto;
-      display: block;
+      /* If the ad script creates a specific element (like a div with an ID or class)
+         for the ad itself, you might target that instead of *.
+         Example:
+         .MainAdverTiseMentDiv .ad-wrapper {
+           transform: scale(0.8);
+           transform-origin: center top;
+         }
+      */
     }
-    */
 
   </style>
 </head>
@@ -208,7 +231,7 @@
   </div>
 </section>
 
-  <!-- Desktop Banner Ad -->
+  <!-- Ad Placeholder 1 -->
   <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6InRBSW9RVGNQQ0FOUlhoenFsSHJndFE9PSIsInZhbHVlIjoiNUhtVUp1QlFQdEJmSjVSV1Z4dERtZz09IiwibWFjIjoiN2FhMDE1NmYwY2Y1NjU1NDAyMjA0ZmVhNzA2M2M4Y2ViMTM5YWY0MTFiZGNmNDU3NDliZjlhNzZlYTJmNzI2OCIsInRhZyI6IiJ9" data-adsize="728x90"></div>
 
 <section id="contact">
@@ -227,15 +250,7 @@
   &copy; 2025 ProSite. All Rights Reserved.
 </footer>
 
-<!-- Mobile/Smaller Ad Placeholder - Consider using a different ad size if available -->
-<!-- The code below repeats the same ad div structure. If your ad system
-     can serve different sizes based on a class or data attribute, you might
-     modify this. For now, it will try to adapt the 728x90 to mobile. -->
-
-  <!-- This is a placeholder. For truly optimal mobile ads, you'd ideally
-       use a smaller standard mobile ad unit if your ad provider supports it.
-       If the 'ad.js' script handles responsive sizing of the iframe/ad content,
-       this setup will work by adapting the container. -->
+<!-- Ad Placeholders 2 onwards -->
   <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
   <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
   <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
