@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pro Responsive Website</title>
-
-  <!-- Ad Scripts (assuming these handle the ad rendering) -->
   <script src="https://adsbitvex.site/assets/ads/ad.js" class="adScriptClass"></script>
   <script src="https://pxfxads.abdstudiox.site/assets/ads/ad.js" class="adScriptClass"></script>
 
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pro Responsive Website</title>
   <style>
     /* Reset & basic styles */
     * {margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif;}
@@ -113,85 +111,47 @@
     /* Footer */
     footer {background:#1f1f1f; color:#fff; text-align:center; padding:20px;}
 
-    /* --- Responsive Ad Styling --- */
-
-    /* Default ad styles (can be hidden on mobile if needed) */
-    .desktop-ad {
-      display: block; /* Show by default */
-      width: 100%;
-      max-width: 728px; /* Example: Leaderboard size */
-      margin: 30px auto; /* Center ads */
-      text-align: center; /* Center ad content if not full width */
-      /* background-color: #eee; /* Visual aid for ad space */
-      /* height: 90px; /* Example height */
+    /* --- Responsive Ad Styles --- */
+    .MainAdverTiseMentDiv {
+      margin: 20px auto; /* Center the ad div */
+      text-align: center; /* Center content within the div */
+      background-color: #eee; /* Optional: background to see the div bounds */
+      display: flex; /* Use flex to help center the ad if it's smaller than container */
+      justify-content: center;
+      align-items: center;
+      /* Default for larger screens */
+      max-width: 728px; /* Max width for desktop */
+      height: 90px; /* Default height */
+      overflow: hidden; /* Hide anything that might overflow */
     }
 
-    /* Mobile ad styles */
-    .mobile-ad {
-      display: none; /* Hide by default */
-      width: 100%;
-      max-width: 320px; /* Example: Mobile banner size */
-      margin: 20px auto; /* Center ads */
-      text-align: center;
-      /* background-color: #ddd; /* Visual aid for ad space */
-      /* height: 50px; /* Example height */
-    }
-
-    /* Media Query for smaller screens (e.g., mobile devices) */
+    /* Media query for mobile devices */
     @media (max-width: 768px) {
-      .desktop-ad {
-        display: none; /* Hide desktop ads on smaller screens */
+      .MainAdverTiseMentDiv {
+        width: 100%; /* Take full width on mobile */
+        max-width: 100%; /* Remove max-width constraint */
+        height: auto; /* Auto height to accommodate scaled ad */
+        padding: 0 10px; /* Add some padding for very small screens */
+        box-sizing: border-box;
       }
-      .mobile-ad {
-        display: block; /* Show mobile ads on smaller screens */
-      }
-      section {
-        padding: 40px 20px; /* Slightly less padding on mobile */
-      }
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-      .hero p {
-        font-size: 1.1rem;
-      }
-      .about {
-        flex-direction: column; /* Stack elements vertically on mobile */
-      }
-      .about img, .about .content {
-        flex-basis: 100%; /* Allow them to take full width */
-      }
+
+      /* Crucially, we need to instruct the ad itself to scale down if possible.
+         This part depends heavily on the ad script. If the script doesn't
+         automatically scale or provide mobile-specific sizes, you might
+         need to manually inject smaller ad units for mobile.
+         For now, we assume the ad script tries to fit. */
     }
 
-    /* Media Query for larger screens (e.g., desktops) */
-    @media (min-width: 769px) {
-      .desktop-ad {
-        display: block; /* Ensure desktop ads are shown */
-      }
-      .mobile-ad {
-        display: none; /* Ensure mobile ads are hidden */
-      }
+    /* Ad Script Specifics (if applicable) */
+    /* If the ad script uses iframes or specific classes for the ad itself,
+       you might need to style those too. For example: */
+    /*
+    .MainAdverTiseMentDiv iframe {
+      max-width: 100%;
+      height: auto;
+      display: block;
     }
-
-    /* Pro Placement Strategy: Adding ads within specific sections */
-    /* You can use these classes to target specific ad placements */
-    .ad-placement-top { /* Example for an ad at the very top */
-        margin-top: 0;
-        padding-top: 0;
-    }
-    .ad-placement-bottom { /* Example for an ad at the very bottom */
-        margin-bottom: 0;
-        padding-bottom: 0;
-    }
-    .ad-placement-after-hero {
-        margin-top: 40px; /* Adjust spacing as needed */
-    }
-    .ad-placement-between-sections {
-        margin-top: 60px;
-        margin-bottom: 60px;
-    }
-    .ad-placement-before-footer {
-        margin-bottom: 40px; /* Adjust spacing as needed */
-    }
+    */
 
   </style>
 </head>
@@ -219,9 +179,6 @@
   <p>Your modern responsive website solution</p>
   <button>Get Started</button>
 </section>
-
-<!-- Desktop Ad Example (Leaderboard) -->
-<div class='MainAdverTiseMentDiv desktop-ad' data-publisher="eyJpdiI6InRBSW9RVGNQQ0FOUlhoenFsSHJndFE9PSIsInZhbHVlIjoiNUhtVUp1QlFQdEJmSjVSV1Z4dERtZz09IiwibWFjIjoiN2FhMDE1NmYwY2Y1NjU1NDAyMjA0ZmVhNzA2M2M4Y2ViMTM5YWY0MTFiZGNmNDU3NDliZjlhNzZlYTJmNzI2OCIsInRhZyI6IiJ9" data-adsize="728x90"></div>
 
 <section id="about">
   <h2 class="section-title">About Us</h2>
@@ -251,11 +208,8 @@
   </div>
 </section>
 
-<!-- Mobile Ad Example (Banner) -->
-<div class='MainAdverTiseMentDiv mobile-ad' data-publisher="eyJpdiI6InRBSW9RVGNQQ0FOUlhoenFsSHJndFE9PSIsInZhbHVlIjoiNUhtVUp1QlFQdEJmSjVSV1Z4dERtZz09IiwibWFjIjoiN2FhMDE1NmYwY2Y1NjU1NDAyMjA0ZmVhNzA2M2M4Y2ViMTM5YWY0MTFiZGNmNDU3NDliZjlhNzZlYTJmNzI2OCIsInRhZyI6IiJ9" data-adsize="320x50"></div>
-<!-- You can have multiple ad containers for different sizes/placements -->
-<div class='MainAdverTiseMentDiv desktop-ad' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-
+  <!-- Desktop Banner Ad -->
+  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6InRBSW9RVGNQQ0FOUlhoenFsSHJndFE9PSIsInZhbHVlIjoiNUhtVUp1QlFQdEJmSjVSV1Z4dERtZz09IiwibWFjIjoiN2FhMDE1NmYwY2Y1NjU1NDAyMjA0ZmVhNzA2M2M4Y2ViMTM5YWY0MTFiZGNmNDU3NDliZjlhNzZlYTJmNzI2OCIsInRhZyI6IiJ9" data-adsize="728x90"></div>
 
 <section id="contact">
   <h2 class="section-title">Contact Us</h2>
@@ -269,15 +223,25 @@
   </div>
 </section>
 
-<!-- Another Desktop Ad Example -->
-<div class='MainAdverTiseMentDiv desktop-ad' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="300x600"></div>
-<!-- Mobile Ad Example (Square/Vertical) -->
-<div class='MainAdverTiseMentDiv mobile-ad' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="300x600"></div>
-
-
 <footer>
   &copy; 2025 ProSite. All Rights Reserved.
 </footer>
+
+<!-- Mobile/Smaller Ad Placeholder - Consider using a different ad size if available -->
+<!-- The code below repeats the same ad div structure. If your ad system
+     can serve different sizes based on a class or data attribute, you might
+     modify this. For now, it will try to adapt the 728x90 to mobile. -->
+
+  <!-- This is a placeholder. For truly optimal mobile ads, you'd ideally
+       use a smaller standard mobile ad unit if your ad provider supports it.
+       If the 'ad.js' script handles responsive sizing of the iframe/ad content,
+       this setup will work by adapting the container. -->
+  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
+  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
+  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
+  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
+  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
+  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
 
 <script>
   // Mobile menu toggle
@@ -286,57 +250,6 @@
   menuToggle.addEventListener('click', () => {
     navUl.classList.toggle('active');
   });
-
-  // --- More advanced ad responsiveness with JavaScript (Optional) ---
-  // This is useful if your ad script doesn't automatically handle
-  // different ad sizes based on container width or if you need more control.
-
-  function loadResponsiveAds() {
-    const adDivs = document.querySelectorAll('.MainAdverTiseMentDiv');
-    const screenWidth = window.innerWidth;
-
-    adDivs.forEach(adDiv => {
-      // Determine which ad to show based on screen width
-      if (screenWidth <= 768) { // Mobile
-        // If it's a desktop ad, try to replace it or hide it
-        if (adDiv.classList.contains('desktop-ad')) {
-          adDiv.classList.remove('desktop-ad');
-          adDiv.classList.add('mobile-ad');
-          // You might need to dynamically change data-adsize here if your ad script
-          // doesn't infer it from the class or if you have specific mobile sizes.
-          // Example: adDiv.setAttribute('data-adsize', '320x50');
-        }
-      } else { // Desktop
-        // If it's a mobile ad, try to replace it or hide it
-        if (adDiv.classList.contains('mobile-ad')) {
-          adDiv.classList.remove('mobile-ad');
-          adDiv.classList.add('desktop-ad');
-          // Example: adDiv.setAttribute('data-adsize', '728x90');
-        }
-      }
-
-      // Ensure the correct ad size is set (this is a simplified example)
-      // Your ad.js script should ideally interpret the container's width or
-      // the data-adsize attribute intelligently.
-      if (adDiv.classList.contains('desktop-ad') && !adDiv.dataset.adsize.includes('728x90')) {
-          // This is a simplification. In a real scenario, you'd want to set specific
-          // desktop sizes if you have multiple, e.g., 728x90 or 970x90.
-          // If you have multiple desktop ad divs, you might need more specific logic.
-          // For now, we rely on the initial data-adsize provided in the HTML.
-      } else if (adDiv.classList.contains('mobile-ad') && !adDiv.dataset.adsize.includes('320x50')) {
-          // Similar simplification for mobile.
-      }
-    });
-  }
-
-  // Run the function on page load
-  document.addEventListener('DOMContentLoaded', loadResponsiveAds);
-  // Run the function on window resize to adapt to screen changes
-  window.addEventListener('resize', loadResponsiveAds);
-
-  // You might need to trigger your ad.js script after making these changes if it doesn't
-  // automatically re-render based on DOM changes.
-  // Example: if (typeof initializeAds === 'function') { initializeAds(); }
 </script>
 
 </body>
