@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Motion Detector (Hacker Style, Location, Messages)</title>
+    <title>Pro Motion Detector (Hacker Style, Video, Location, Messages)</title>
     <style>
         body {
             font-family: monospace;
@@ -25,17 +25,16 @@
         }
         #container {
             position: relative;
-            width: 95%; /* Slightly larger container for better viewing */
+            width: 95%;
             max-width: 800px;
-            margin: 15px auto; /* Add some vertical margin */
+            margin: 15px auto;
             border: 2px solid #0f0;
             box-shadow: 0 0 15px #0f0;
-            background-color: #111; /* Darker background for contrast */
+            background-color: #111;
         }
         #videoElement {
             width: 100%;
             display: block;
-            /* Removed border and shadow from video, now on container */
         }
         #overlayCanvas {
             position: absolute;
@@ -43,31 +42,31 @@
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Crucial for canvas to not block mouse events */
+            pointer-events: none;
         }
         #status {
             margin-top: 15px;
             font-size: 1.2em;
             font-weight: bold;
             padding: 10px;
-            background-color: rgba(0, 255, 0, 0.1); /* Subtle background for status */
+            background-color: rgba(0, 255, 0, 0.1);
             border-radius: 5px;
             width: 80%;
             max-width: 700px;
-            margin-bottom: 20px; /* Add margin at the bottom */
-            min-height: 30px; /* Ensure it doesn't collapse */
+            margin-bottom: 20px;
+            min-height: 30px;
         }
         .motion-detected {
-            box-shadow: 0 0 20px #ff0000 !important; /* Brighter red glow */
+            box-shadow: 0 0 20px #ff0000 !important;
             animation: flicker 0.7s infinite alternate;
         }
         @keyframes flicker {
             from { opacity: 1; }
-            to { opacity: 0.7; } /* Slightly less intense flicker */
+            to { opacity: 0.7; }
         }
         .roi-box {
             position: absolute;
-            border: 2px dashed #0f0; /* Thicker dashed line */
+            border: 2px dashed #0f0;
             box-sizing: border-box;
         }
         .alert-message {
@@ -84,13 +83,32 @@
             color: red;
             font-weight: bolder;
         }
+        .recording-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            z-index: 10;
+            opacity: 0.8;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
     </style>
 </head>
 <body>
-    <h1>>_ Secure Surveillance Feed</h1>
+    <h1>>_ Advanced Security Feed</h1>
     <div id="container">
         <video id="videoElement" autoplay muted playsinline></video>
         <canvas id="overlayCanvas"></canvas>
+        <div id="recordingIndicator" class="recording-indicator" style="display: none;">RECORDING</div>
     </div>
     <div id="status">Initializing System...</div>
 
@@ -103,33 +121,35 @@
         const overlayCanvas = document.getElementById('overlayCanvas');
         const overlayCtx = overlayCanvas.getContext('2d');
         const statusDiv = document.getElementById('status');
+        const recordingIndicator = document.getElementById('recordingIndicator');
 
         let previousFrame = null;
-        const motionThreshold = 25;         // Higher threshold for less sensitivity to minor changes
-        const motionPercentageThreshold = 4; // Consider motion if > 4% of ROI pixels change
-        const captureCooldownPeriod = 5000; // 5 seconds between image captures/sends
+        const motionThreshold = 25;
+        const motionPercentageThreshold = 4;
+        const motionAlertCooldown = 5000;      // Cooldown between sending motion alerts (image + video)
+        const periodicSnapshotInterval = 60000; // Send snapshot + status every 60 seconds (1 minute)
         const locationUpdateInterval = 60000 * 5; // 5 minutes
         const deviceInfoUpdateInterval = 60000 * 30; // 30 minutes
+        const videoRecordDuration = 10000;     // 10 seconds for video recording
 
-        let lastCaptureTime = 0;
+        let lastMotionAlertTime = 0;
+        let lastPeriodicSnapshotTime = 0;
         let isProcessing = false;
+        let isRecording = false;
         let lastKnownLocation = null;
-        let locationIntervalId = null;
-        let deviceStatusIntervalId = null;
-        let roiBoxes = []; // Store elements for ROIs to draw them
+        let mediaRecorder = null;
+        let recordedBlobs = [];
+        let activeStream = null; // To hold the media stream
 
-
-        // Define multiple Regions of Interest (ROIs) - normalized coordinates (0.0 to 1.0)
-        // These are the areas where motion will be specifically monitored.
         const roisConfig = [
-            { x1: 0.1, y1: 0.1, x2: 0.4, y2: 0.4, id: 'Entryway' },     // Top-left, e.g., front door
-            { x1: 0.6, y1: 0.1, x2: 0.9, y2: 0.4, id: 'WindowArea' },   // Top-right, e.g., a window
-            { x1: 0.3, y1: 0.6, x2: 0.7, y2: 0.9, id: 'Hallway' }       // Bottom-center, e.g., a hallway
+            { x1: 0.1, y1: 0.1, x2: 0.4, y2: 0.4, id: 'Entryway' },
+            { x1: 0.6, y1: 0.1, x2: 0.9, y2: 0.4, id: 'WindowArea' },
+            { x1: 0.3, y1: 0.6, x2: 0.7, y2: 0.9, id: 'Hallway' }
         ];
 
         function updateStatus(message, isError = false, isAlert = false) {
             statusDiv.textContent = `>_ ${message}`;
-            statusDiv.className = ''; // Reset classes
+            statusDiv.className = '';
             if (isError) {
                 statusDiv.classList.add('error-message');
                 console.error(`Error: ${message}`);
@@ -141,58 +161,70 @@
             }
         }
 
-        async function startCamera() {
-           updateStatus("Requesting camera access...");
-           try {
-                const stream = await navigator.mediaDevices.getUserMedia({
+        async function startCameraAndMicrophone() {
+            updateStatus("Requesting camera and microphone access...");
+            try {
+                activeStream = await navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: "environment", // Use rear camera if available, "user" for front
+                        facingMode: "environment",
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
                     },
-                    audio: false // We don't need audio for motion detection
+                    audio: {
+                        sampleRate: 44100, // Common sample rate
+                        channelCount: 2 // Stereo
+                    }
                 });
-                video.srcObject = stream;
+
+                video.srcObject = activeStream;
 
                 video.onloadedmetadata = () => {
                     overlayCanvas.width = video.videoWidth;
                     overlayCanvas.height = video.videoHeight;
-                    drawROIs(); // Draw ROIs on startup
+                    drawROIs();
                     updateStatus("System Initialized. Monitoring...");
-                    requestAnimationFrame(processFrame); // Start processing frames
+                    requestAnimationFrame(processFrame);
                 };
                 video.onerror = (e) => {
-                    updateStatus("Camera error occurred.", true);
+                    updateStatus("Video playback error.", true);
                     console.error("Video Error:", e);
                 };
             } catch (err) {
-                updateStatus(`Camera access denied or unavailable. Error: ${err.message}`, true);
+                let errorMessage = `Access denied or unavailable.`;
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    errorMessage = `Permissions denied. Please enable camera, microphone, and location in your browser settings.`;
+                } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                    errorMessage = `No camera or microphone found.`;
+                } else if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+                    errorMessage = `Browser constraints could not be met (e.g., resolution). Try again or check browser settings.`;
+                } else {
+                    errorMessage = `Error: ${err.message}`;
+                }
+                updateStatus(`Failed to start media: ${errorMessage}`, true);
                 console.error("getUserMedia Error:", err);
             }
         }
 
         function drawROIs() {
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height); // Clear previous drawings
-
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             for (const roi of roisConfig) {
                 const x1 = roi.x1 * overlayCanvas.width;
                 const y1 = roi.y1 * overlayCanvas.height;
                 const x2 = roi.x2 * overlayCanvas.width;
                 const y2 = roi.y2 * overlayCanvas.height;
 
-                overlayCtx.strokeStyle = '#0f0'; // Green
+                overlayCtx.strokeStyle = '#0f0';
                 overlayCtx.lineWidth = 2;
-                overlayCtx.setLineDash([5, 3]); // Dashed line for ROIs
+                overlayCtx.setLineDash([5, 3]);
                 overlayCtx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-                overlayCtx.setLineDash([]);  // Reset dash for other drawings
+                overlayCtx.setLineDash([]);
 
-                // Add ROI label
                 overlayCtx.font = '12px monospace';
                 overlayCtx.fillStyle = '#0f0';
-                overlayCtx.shadowColor = 'rgba(0, 255, 0, 0.5)'; // Subtle shadow
+                overlayCtx.shadowColor = 'rgba(0, 255, 0, 0.5)';
                 overlayCtx.shadowBlur = 5;
                 overlayCtx.fillText(roi.id, x1 + 8, y1 + 18);
-                overlayCtx.shadowBlur = 0; // Reset shadow
+                overlayCtx.shadowBlur = 0;
             }
         }
 
@@ -201,27 +233,17 @@
             const data = imageData.data;
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                data[i] = avg;     // Red channel
-                data[i + 1] = avg; // Green channel
-                data[i + 2] = avg; // Blue channel
-                // data[i + 3] is alpha, leave it unchanged
+                data[i] = avg;
+                data[i + 1] = avg;
+                data[i + 2] = avg;
             }
             return imageData;
         }
 
         function detectMotionInROIs(currentFrame, previousFrame) {
-            if (!previousFrame) {
-                return false; // Cannot detect motion without a previous frame
-            }
+            if (!previousFrame) return false;
 
             let overallMotionDetected = false;
-
-            // Create a temporary canvas to draw differences for visualization (optional, for debugging)
-            // const diffCanvas = document.createElement('canvas');
-            // diffCanvas.width = overlayCanvas.width;
-            // diffCanvas.height = overlayCanvas.height;
-            // const diffCtx = diffCanvas.getContext('2d');
-            // diffCtx.globalCompositeOperation = 'lighter'; // Blend differences
 
             for (const roi of roisConfig) {
                 const roiX1 = Math.floor(overlayCanvas.width * roi.x1);
@@ -232,25 +254,28 @@
                 let motionPixelsInRoi = 0;
                 const totalPixelsInRoi = roiWidth * roiHeight;
 
-                // Get specific image data for the current ROI for both frames
-                const currentRoiData = currentFrame.data.slice(
-                    (roiY1 * overlayCanvas.width + roiX1) * 4,
-                    ((roiY1 + roiHeight) * overlayCanvas.width + (roiX1 + roiWidth)) * 4
-                );
-                const previousRoiData = previousFrame.data.slice(
-                    (roiY1 * overlayCanvas.width + roiX1) * 4,
-                    ((roiY1 + roiHeight) * overlayCanvas.width + (roiX1 + roiWidth)) * 4
-                );
+                // Create a temporary ImageData for the ROI to avoid slicing large arrays repeatedly
+                const currentRoiImgData = new ImageData(roiWidth, roiHeight);
+                const previousRoiImgData = new ImageData(roiWidth, roiHeight);
+
+                // Copy pixel data for the ROI from the full frame to the ROI-specific ImageData
+                for (let y = 0; y < roiHeight; y++) {
+                    for (let x = 0; x < roiWidth; x++) {
+                        const currentPixelIndex = ((roiY1 + y) * overlayCanvas.width + (roiX1 + x)) * 4;
+                        const roiPixelIndex = (y * roiWidth + x) * 4;
+
+                        currentRoiImgData.data.set(currentFrame.data.slice(currentPixelIndex, currentPixelIndex + 4), roiPixelIndex);
+                        previousRoiImgData.data.set(previousFrame.data.slice(currentPixelIndex, currentPixelIndex + 4), roiPixelIndex);
+                    }
+                }
+
+                const currentRoiData = currentRoiImgData.data;
+                const previousRoiData = previousRoiImgData.data;
 
                 for (let i = 0; i < currentRoiData.length; i += 4) {
                     const diff = Math.abs(currentRoiData[i] - previousRoiData[i]);
                     if (diff > motionThreshold) {
                         motionPixelsInRoi++;
-                        // Add a visual indicator for motion on the diff canvas (optional)
-                        // const pixelX = (i / 4) % roiWidth;
-                        // const pixelY = Math.floor((i / 4) / roiWidth);
-                        // diffCtx.fillStyle = `rgba(255, 0, 0, ${diff / 255})`; // Red with intensity
-                        // diffCtx.fillRect(roiX1 + pixelX, roiY1 + pixelY, 1, 1);
                     }
                 }
 
@@ -258,33 +283,26 @@
 
                 if (motionPercentage > motionPercentageThreshold) {
                     overallMotionDetected = true;
-                    // Optionally, highlight the ROI box when motion is detected in it
-                    overlayCtx.strokeStyle = '#ff0000'; // Red when motion detected
+                    overlayCtx.strokeStyle = '#ff0000';
                     overlayCtx.lineWidth = 3;
                     overlayCtx.strokeRect(roiX1, roiY1, roiWidth, roiHeight);
-                    overlayCtx.strokeStyle = '#0f0'; // Reset color
+                    overlayCtx.strokeStyle = '#0f0';
                     overlayCtx.lineWidth = 2;
                 }
             }
-
-            // If you want to overlay the difference image, do it here
-            // overlayCtx.putImageData(diffCanvas.getImageData(0, 0, diffCanvas.width, diffCanvas.height), 0, 0); // This will overwrite ROIs
-
             return overallMotionDetected;
         }
 
         async function processFrame() {
             if (isProcessing) {
-                requestAnimationFrame(processFrame); // Skip this frame if already processing
+                requestAnimationFrame(processFrame);
                 return;
             }
             isProcessing = true;
 
-            // Clear previous drawings on canvas (except ROIs which are redrawn in detectMotionInROIs or here)
             overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawROIs(); // Redraw ROIs each frame to ensure they are visible
+            drawROIs();
 
-            // Capture current frame as grayscale image data for comparison
             const currentFrameGrayscale = getGrayscaleImageData(overlayCtx, 0, 0, overlayCanvas.width, overlayCanvas.height);
 
             let motionDetectedThisFrame = false;
@@ -296,23 +314,133 @@
                 video.classList.add('motion-detected');
                 const currentTime = Date.now();
 
-                // Trigger alert and capture/send if cooldown period has passed
-                if (currentTime - lastCaptureTime > captureCooldownPeriod) {
-                    updateStatus("MOTION DETECTED!", false, true); // Show alert in status
-                    await captureAndSendImage(true); // Send image with alert flag
-                    lastCaptureTime = currentTime;
+                if (currentTime - lastMotionAlertTime > motionAlertCooldown) {
+                    updateStatus("MOTION DETECTED!", false, true);
+                    await captureAndSendImage(true); // Send snapshot immediately
+                    startRecording(); // Start recording video
+                    lastMotionAlertTime = currentTime;
                 }
             } else {
                 video.classList.remove('motion-detected');
-                // Only reset status if not in an error state and no pending alert
                 if (!statusDiv.classList.contains('error-message') && !statusDiv.classList.contains('alert-message')) {
-                     updateStatus("Monitoring...");
+                    updateStatus("Monitoring...");
                 }
             }
 
-            previousFrame = currentFrameGrayscale; // Store current frame for next comparison
+            // Periodic Snapshot (independent of motion, but throttled)
+            const currentTime = Date.now();
+            if (currentTime - lastPeriodicSnapshotTime > periodicSnapshotInterval) {
+                updateStatus("Sending periodic status snapshot...");
+                await captureAndSendImage(false); // Send snapshot without "alert" flag
+                lastPeriodicSnapshotTime = currentTime;
+            }
+
+
+            previousFrame = currentFrameGrayscale;
             isProcessing = false;
-            requestAnimationFrame(processFrame); // Schedule the next frame processing
+            requestAnimationFrame(processFrame);
+        }
+
+        function showRecordingIndicator() {
+            recordingIndicator.style.display = 'block';
+        }
+
+        function hideRecordingIndicator() {
+            recordingIndicator.style.display = 'none';
+        }
+
+        async function startRecording() {
+            if (isRecording || !activeStream) return;
+
+            isRecording = true;
+            showRecordingIndicator();
+            updateStatus("Recording started...");
+            recordedBlobs = [];
+
+            // Try to find a suitable mime type for broad compatibility
+            // Common types: video/webm, video/mp4
+            // 'video/webm;codecs=vp8,opus' or 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'
+            const mimeType = 'video/webm;codecs=vp8,opus'; // VP8 for webm, Opus for audio
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                const alternativeMimeType = 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'; // H.264/AAC for mp4
+                if (MediaRecorder.isTypeSupported(alternativeMimeType)) {
+                    mimeType = alternativeMimeType;
+                } else {
+                    updateStatus("Neither WebM nor MP4 recording is supported. Cannot record video.", true);
+                    isRecording = false;
+                    hideRecordingIndicator();
+                    return;
+                }
+            }
+
+            try {
+                mediaRecorder = new MediaRecorder(activeStream, { mimeType: mimeType });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        recordedBlobs.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    isRecording = false;
+                    hideRecordingIndicator();
+                    updateStatus("Recording stopped.");
+                    await sendRecordedVideo(); // Send the recorded video
+                };
+
+                mediaRecorder.start(videoRecordDuration); // Start recording, will stop after duration automatically if not stopped manually
+                setTimeout(() => {
+                    if (isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                }, videoRecordDuration);
+
+            } catch (error) {
+                updateStatus(`Error starting MediaRecorder: ${error.message}`, true);
+                console.error("MediaRecorder Error:", error);
+                isRecording = false;
+                hideRecordingIndicator();
+            }
+        }
+
+        async function sendRecordedVideo() {
+            if (recordedBlobs.length === 0) {
+                updateStatus("No video data recorded.");
+                return;
+            }
+
+            const videoBlob = new Blob(recordedBlobs, { type: mediaRecorder.mimeType });
+            const videoSizeMB = (videoBlob.size / 1024 / 1024).toFixed(2);
+            const MAX_TELEGRAM_SIZE_MB = 50; // Telegram bot file size limit
+
+            if (videoBlob.size > MAX_TELEGRAM_SIZE_MB * 1024 * 1024) {
+                updateStatus(`Video too large (${videoSizeMB}MB). Telegram limit is ${MAX_TELEGRAM_SIZE_MB}MB. Skipping video send.`, true);
+                // Optionally, you could try to re-record with lower quality here
+                return;
+            }
+
+            updateStatus(`Transmitting video (${videoSizeMB}MB)...`);
+
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('caption', `ALERT: Motion detected! Recorded video (${videoSizeMB}MB). ${new Date().toLocaleString()}`);
+            formData.append('video', videoBlob, `motion_video_${Date.now()}.mp4`); // Use .mp4 extension, Telegram will re-encode if necessary
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await response.json();
+                if (data.ok) {
+                    updateStatus("Recorded video sent successfully.");
+                } else {
+                    updateStatus(`Telegram video transmission failed: ${data.description}`, true);
+                }
+            } catch (error) {
+                updateStatus(`Network error sending video: ${error.message}`, true);
+            }
         }
 
         async function captureAndSendImage(isMotionAlert = false) {
@@ -325,11 +453,8 @@
                 return;
             }
 
-            // Draw the current video frame onto the canvas before capturing
             overlayCtx.drawImage(video, 0, 0, overlayCanvas.width, overlayCanvas.height);
-            // Optionally redraw ROIs over the captured image if you want them in the snapshot
-            drawROIs();
-
+            drawROIs(); // Ensure ROIs are drawn on the captured image
 
             overlayCanvas.toBlob(async (blob) => {
                 if (!blob) {
@@ -339,30 +464,31 @@
 
                 const formData = new FormData();
                 formData.append('chat_id', CHAT_ID);
-                formData.append('caption', `ALERT: Motion detected! ${isMotionAlert ? 'System triggered.' : ''} ${new Date().toLocaleString()}`);
-                formData.append('photo', blob, `motion_capture_${Date.now()}.jpg`);
+                formData.append('caption', `Status Snapshot. ${isMotionAlert ? 'ALERT: Motion detected!' : ''} ${new Date().toLocaleString()}`);
+                formData.append('photo', blob, `snapshot_${Date.now()}.jpg`);
 
                 try {
-                    updateStatus("Transmitting alert image...");
+                    updateStatus("Transmitting snapshot...");
                     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
                         method: 'POST',
                         body: formData,
-                        // No need to set Content-Type, FormData handles it
                     });
-
                     const data = await response.json();
                     if (data.ok) {
-                        updateStatus("Alert image sent successfully.");
+                        if (isMotionAlert) {
+                            updateStatus("Motion alert image sent.");
+                        } else {
+                            updateStatus("Periodic snapshot sent.");
+                        }
                     } else {
                         updateStatus(`Telegram image transmission failed: ${data.description}`, true);
                     }
                 } catch (error) {
                     updateStatus(`Network error sending image: ${error.message}`, true);
                 }
-            }, 'image/jpeg', 0.8); // JPEG format, 80% quality
+            }, 'image/jpeg', 0.7); // Lower quality for potentially smaller file size
         }
 
-        // Generic function to send text messages to Telegram
         async function sendTelegramMessage(message) {
             if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN') {
                 updateStatus("Telegram bot token not configured.", true);
@@ -376,7 +502,7 @@
             const formData = new FormData();
             formData.append('chat_id', CHAT_ID);
             formData.append('text', message);
-            formData.append('parse_mode', 'HTML'); // Allow basic HTML formatting like bold
+            formData.append('parse_mode', 'HTML');
 
             try {
                 const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -386,15 +512,12 @@
                 const data = await response.json();
                 if (!data.ok) {
                     updateStatus(`Telegram message failed: ${data.description}`, true);
-                } else {
-                    // console.log("Message sent:", message); // For debugging
                 }
             } catch (error) {
                 updateStatus(`Network error sending message: ${error.message}`, true);
             }
         }
 
-        // Get and send location
         function getLocationAndSend() {
             if (!navigator.geolocation) {
                 sendTelegramMessage("Geolocation is not supported by this browser.");
@@ -409,23 +532,26 @@
 
                     const currentLocation = { latitude, longitude, accuracy };
 
-                    // Check if location has changed significantly to avoid spamming Telegram
-                    // Adjust threshold for significant change as needed (e.g., 10 meters)
-                    const significantChangeThreshold = 10; // meters
-                    if (lastKnownLocation &&
-                        (await getDistanceFromLatLonInMeters(latitude, longitude, lastKnownLocation.latitude, lastKnownLocation.longitude)) < significantChangeThreshold) {
-                        // console.log("Location unchanged, skipping send.");
-                        return;
+                    const significantChangeThreshold = 20; // meters
+                    let distChanged = false;
+                    if (lastKnownLocation) {
+                        const dist = await getDistanceFromLatLonInMeters(latitude, longitude, lastKnownLocation.latitude, lastKnownLocation.longitude);
+                        if (dist >= significantChangeThreshold) {
+                            distChanged = true;
+                        }
+                    } else {
+                        distChanged = true; // First time getting location
                     }
 
-                    lastKnownLocation = currentLocation;
-
-                    const locationMessage = `<b>Device Location Update:</b>\n` +
-                                            `📍 Latitude: <code>${latitude.toFixed(6)}</code>\n` +
-                                            `📍 Longitude: <code>${longitude.toFixed(6)}</code>\n` +
-                                            `📏 Accuracy: <code>${accuracy.toFixed(0)}</code> meters\n` +
-                                            `🔗 <a href="https://maps.google.com/?q=${latitude},${longitude}">View on Map</a>`;
-                    await sendTelegramMessage(locationMessage);
+                    if (distChanged) {
+                        lastKnownLocation = currentLocation;
+                        const locationMessage = `<b>Device Location Update:</b>\n` +
+                                                `📍 Latitude: <code>${latitude.toFixed(6)}</code>\n` +
+                                                `📍 Longitude: <code>${longitude.toFixed(6)}</code>\n` +
+                                                `📏 Accuracy: <code>${accuracy.toFixed(0)}</code> meters\n` +
+                                                `🔗 <a href="https://maps.google.com/?q=${latitude},${longitude}">View on Map</a>`;
+                        await sendTelegramMessage(locationMessage);
+                    }
                 },
                 (error) => {
                     sendTelegramMessage(`❌ Error getting location: ${error.message}`);
@@ -433,10 +559,9 @@
             );
         }
 
-        // Helper function to calculate distance between two lat/lon points (Haversine formula)
         async function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
             const R = 6371e3; // metres
-            const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+            const φ1 = lat1 * Math.PI / 180;
             const φ2 = lat2 * Math.PI / 180;
             const Δφ = (lat2 - lat1) * Math.PI / 180;
             const Δλ = (lon2 - lon1) * Math.PI / 180;
@@ -445,23 +570,17 @@
                       Math.cos(φ1) * Math.cos(φ2) *
                       Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            const d = R * c; // distance in metres
+            const d = R * c;
             return d;
         }
 
-
-        // Function to get and send device info and network data
         async function getAndSendDeviceInfo() {
             let deviceInfo = "<u><b>Device & Network Status:</b></u>\n";
-
-            // Basic device info
             deviceInfo += `👤 User Agent: <code>${navigator.userAgent}</code>\n`;
             deviceInfo += `💻 Platform: <code>${navigator.platform}</code>\n`;
             deviceInfo += `🖥️ CPU Cores: <code>${navigator.hardwareConcurrency || 'N/A'}</code>\n`;
             deviceInfo += `💾 RAM: <code>${navigator.deviceMemory || 'N/A'} GB</code>\n`;
 
-            // Network info
             deviceInfo += "\n🌐 Network Status:\n";
             const connectionType = navigator.onLine ? 'Online' : 'Offline';
             deviceInfo += `  - Connection: <b>${connectionType}</b>\n`;
@@ -476,8 +595,6 @@
             } else {
                 deviceInfo += `  - (Network Information API not supported)\n`;
             }
-
-            // Simulate data usage (since it's not directly accessible)
             deviceInfo += `\n📈 Simulated Data Usage:\n`;
             deviceInfo += `  - WiFi: <code>${Math.floor(Math.random() * 500)} MB</code>\n`;
             deviceInfo += `  - Cellular: <code>${Math.floor(Math.random() * 200)} MB</code>\n`;
@@ -487,27 +604,31 @@
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Ensure token and chat ID are set
             if (TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN' || CHAT_ID === 'YOUR_CHAT_ID') {
                 updateStatus("Please configure TELEGRAM_BOT_TOKEN and CHAT_ID in the script.", true);
-            } else {
-                updateStatus("Starting security system...");
-                startCamera(); // Start camera feed
-
-                // Get initial location and device status
-                getLocationAndSend();
-                getAndSendDeviceInfo();
-
-                // Set up intervals for periodic updates
-                locationIntervalId = setInterval(getLocationAndSend, locationUpdateInterval);
-                deviceStatusIntervalId = setInterval(getAndSendDeviceInfo, deviceInfoUpdateInterval);
+                return;
             }
+
+            startCameraAndMicrophone();
+
+            // Initial sends
+            getLocationAndSend();
+            getAndSendDeviceInfo();
+            // Send an initial snapshot when ready
+            setTimeout(() => captureAndSendImage(false), 5000); // Send initial snapshot after a short delay
+
+            // Set up intervals
+            setInterval(getLocationAndSend, locationUpdateInterval);
+            setInterval(getAndSendDeviceInfo, deviceInfoUpdateInterval);
         });
 
-        // Handle page unload to clear intervals (optional, but good practice)
         window.addEventListener('beforeunload', () => {
-            if (locationIntervalId) clearInterval(locationIntervalId);
-            if (deviceStatusIntervalId) clearInterval(deviceStatusIntervalId);
+            if (activeStream) {
+                activeStream.getTracks().forEach(track => track.stop()); // Stop all tracks
+            }
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
             console.log("Security system stopped.");
         });
 
