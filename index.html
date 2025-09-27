@@ -1,271 +1,196 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="bn">
 <head>
-  <script src="https://adsbitvex.site/assets/ads/ad.js" class="adScriptClass"></script>
-  <script src="https://pxfxads.abdstudiox.site/assets/ads/ad.js" class="adScriptClass"></script>
-
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pro Responsive Website</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Camera & Mic Test — Safe Capture</title>
   <style>
-    /* Reset & basic styles */
-    * {margin:0; padding:0; box-sizing:border-box; font-family: Arial, sans-serif;}
-    body {line-height:1.6; color:#333;}
-    a {text-decoration:none; color: inherit;}
-    img {max-width:100%; display:block;}
-
-    /* Header */
-    header {
-      display:flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 40px;
-      background: #1f1f1f;
-      color: #fff;
-      position: sticky;
-      top:0;
-      z-index:1000;
-    }
-    .logo {font-size: 1.5rem; font-weight:bold; color:#00bcd4;}
-    nav ul {display:flex; list-style:none;}
-    nav ul li {margin-left:20px;}
-    nav ul li a {color:#fff; font-weight:500; transition:0.3s;}
-    nav ul li a:hover {color:#00bcd4;}
-
-    /* Mobile Menu */
-    .menu-toggle {display:none; cursor:pointer;}
-    .menu-toggle div {width:25px; height:3px; background:#fff; margin:5px 0; transition:0.3s;}
-
-    @media (max-width:768px){
-      nav ul {flex-direction:column; display:none; background:#1f1f1f; width:100%; text-align:center;}
-      nav ul.active {display:flex;}
-      .menu-toggle {display:block;}
-      nav ul li {margin:15px 0;}
-    }
-
-    /* Hero Section */
-    .hero {
-      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://source.unsplash.com/1600x900/?technology') center/cover no-repeat;
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      color:#fff;
-      text-align:center;
-      padding: 0 20px;
-    }
-    .hero h1 {font-size:3rem; margin-bottom:20px;}
-    .hero p {font-size:1.2rem; margin-bottom:30px;}
-    .hero button {
-      padding:15px 30px;
-      font-size:1rem;
-      border:none;
-      border-radius:50px;
-      background:#00bcd4;
-      color:#fff;
-      cursor:pointer;
-      transition:0.3s;
-    }
-    .hero button:hover {background:#0097a7;}
-
-    /* Sections */
-    section {padding:80px 40px;}
-    .section-title {text-align:center; margin-bottom:50px; font-size:2rem; color:#1f1f1f;}
-
-    /* About Section */
-    .about {display:flex; align-items:center; gap:40px; flex-wrap:wrap;}
-    .about img {border-radius:10px; flex:1 1 400px;}
-    .about .content {flex:1 1 400px;}
-
-    /* Services */
-    .services {display:flex; gap:20px; flex-wrap:wrap; justify-content:center;}
-    .service-card {
-      background:#f1f1f1; padding:30px; border-radius:10px;
-      flex:1 1 250px; text-align:center; transition:0.3s;
-    }
-    .service-card:hover {transform: translateY(-10px); box-shadow: 0 10px 20px rgba(0,0,0,0.2);}
-    .service-card h3 {margin-bottom:15px; color:#00bcd4;}
-
-    /* Contact Form */
-    .contact form {max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:15px;}
-    .contact input, .contact textarea {
-      padding:15px;
-      border:1px solid #ccc;
-      border-radius:5px;
-      font-size:1rem;
-      resize:none;
-    }
-    .contact button {
-      padding:15px;
-      border:none;
-      background:#00bcd4;
-      color:#fff;
-      font-size:1rem;
-      cursor:pointer;
-      border-radius:50px;
-      transition:0.3s;
-    }
-    .contact button:hover {background:#0097a7;}
-
-    /* Footer */
-    footer {background:#1f1f1f; color:#fff; text-align:center; padding:20px;}
-
-    /* --- Responsive Ad Styles --- */
-
-    /* Style for the ad container itself */
-    .MainAdverTiseMentDiv {
-      margin: 20px auto; /* Center the ad block horizontally */
-      text-align: center; /* Center inline content */
-      display: flex; /* Use flex to help center the ad content */
-      justify-content: center;
-      align-items: center;
-      background-color: #f0f0f0; /* Optional: helps visualize the container */
-      overflow: hidden; /* Crucial to prevent overflow */
-      box-sizing: border-box; /* Include padding/border in element's total width/height */
-      /* Default for larger screens */
-      max-width: 728px; /* Max width on desktop */
-      height: 90px; /* Standard height */
-    }
-
-    /* For desktop and larger screens, we ensure it fits nicely */
-    @media (min-width: 769px) {
-      .MainAdverTiseMentDiv {
-        /* These are already set above, but explicitly stating here for clarity */
-        max-width: 728px;
-        height: 90px;
-      }
-    }
-
-    /* For mobile and smaller screens */
-    @media (max-width: 768px) {
-      .MainAdverTiseMentDiv {
-        width: 95%; /* Use a significant portion of the screen width */
-        max-width: 95%; /* Ensure it doesn't exceed available space */
-        /* Adjust height if the ad scales down, but aim to keep its presence */
-        height: auto; /* Allow height to adjust based on scaled content */
-        min-height: 90px; /* Ensure it has at least a decent minimum height */
-        padding: 0 5px; /* Slight padding on the sides */
-        box-sizing: border-box; /* Ensure padding doesn't add to the width */
-        /* The magic happens below: making the ad *inside* the div scale */
-      }
-
-      /*
-       * This is the key part: we need to tell the *content* of the ad
-       * (likely an iframe) to scale. This requires knowing the ad's
-       * intrinsic size and applying a transform.
-       *
-       * IMPORTANT: This is a common technique, but it might not work perfectly
-       * with all ad scripts. The ad script might overwrite styles, or the
-       * scaled content could become unreadable.
-       */
-      .MainAdverTiseMentDiv > * { /* Targets direct children like iframes */
-        transform: scale(0.8); /* Scale down the ad content by 20% */
-        transform-origin: center top; /* Scale from the top-center */
-        /* You might need to adjust this scale value (e.g., 0.7, 0.75, 0.9)
-           to find the best balance between size and readability on mobile. */
-      }
-
-      /* If the ad script creates a specific element (like a div with an ID or class)
-         for the ad itself, you might target that instead of *.
-         Example:
-         .MainAdverTiseMentDiv .ad-wrapper {
-           transform: scale(0.8);
-           transform-origin: center top;
-         }
-      */
-    }
-
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial; padding: 18px; max-width: 900px; margin: auto; }
+    h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    video { width: 100%; max-width: 640px; border-radius: 8px; background: #000; }
+    .controls { margin-top: 10px; display:flex; gap:8px; flex-wrap:wrap; }
+    button { padding:8px 12px; border-radius:6px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer; }
+    button:disabled { opacity:0.6; cursor:not-allowed; }
+    .preview { margin-top:12px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start; }
+    .thumb { max-width:200px; border:1px solid #ddd; padding:6px; border-radius:6px; background:#fff; }
+    small { color:#555; display:block; margin-top:6px; }
+    label { display:block; margin-top:12px; }
+    input[type="text"] { width:100%; padding:6px 8px; border-radius:6px; border:1px solid #ccc; }
   </style>
 </head>
 <body>
+  <h1>Camera & Microphone Test (Safe)</h1>
+  <p>এই পেজটি কেবল আপনার অনুমতিতে কাজ করবে। ক্যামেরা/মাইকের ডাটা **কখনোই স্বয়ংক্রিয়ভাবে পাঠানো হবে না**—প্রতিবার আপনাকে ক্লিক করতে হবে।</p>
 
-<header>
-  <div class="logo">ProSite</div>
-  <nav>
-    <ul>
-      <li><a href="#home">Home</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#services">Services</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-  </nav>
-  <div class="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
+  <video id="preview" autoplay playsinline muted></video>
+
+  <div class="controls">
+    <button id="btnStart">Start Camera & Mic</button>
+    <button id="btnStop" disabled>Stop</button>
+    <button id="btnSnap" disabled>Capture Snapshot</button>
+    <button id="btnRecord" disabled>Record 5s Audio</button>
+    <button id="btnSend" disabled>Send Latest to Server</button>
   </div>
-</header>
 
-<section class="hero" id="home">
-  <h1>Welcome to ProSite</h1>
-  <p>Your modern responsive website solution</p>
-  <button>Get Started</button>
-</section>
+  <label>
+    Server upload URL (POST) — আপনার সার্ভারের এন্ডপয়েন্ট দিন:
+    <input id="serverUrl" type="text" placeholder="https://your-server.example.com/upload" />
+  </label>
 
-<section id="about">
-  <h2 class="section-title">About Us</h2>
-  <div class="about">
-    <img src="https://source.unsplash.com/600x400/?office" alt="About Image">
-    <div class="content">
-      <p>We provide professional website solutions that are mobile-friendly, fast, and modern. Perfect for businesses, portfolios, and more. Our team ensures a clean, responsive, and interactive design to enhance user experience.</p>
-    </div>
+  <div class="preview" id="previewArea">
+    <!-- captured thumbnail + audio controls will appear here -->
   </div>
-</section>
 
-<section id="services">
-  <h2 class="section-title">Our Services</h2>
-  <div class="services">
-    <div class="service-card">
-      <h3>Web Design</h3>
-      <p>Modern and responsive website design for all devices.</p>
-    </div>
-    <div class="service-card">
-      <h3>SEO Optimization</h3>
-      <p>Boost your website traffic with professional SEO strategies.</p>
-    </div>
-    <div class="service-card">
-      <h3>Web Development</h3>
-      <p>Custom web development using HTML, CSS, JS, and more.</p>
-    </div>
-  </div>
-</section>
+  <script>
+    const preview = document.getElementById('preview');
+    const btnStart = document.getElementById('btnStart');
+    const btnStop = document.getElementById('btnStop');
+    const btnSnap = document.getElementById('btnSnap');
+    const btnRecord = document.getElementById('btnRecord');
+    const btnSend = document.getElementById('btnSend');
+    const previewArea = document.getElementById('previewArea');
+    const serverUrlInput = document.getElementById('serverUrl');
 
-  <!-- Ad Placeholder 1 -->
-  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6InRBSW9RVGNQQ0FOUlhoenFsSHJndFE9PSIsInZhbHVlIjoiNUhtVUp1QlFQdEJmSjVSV1Z4dERtZz09IiwibWFjIjoiN2FhMDE1NmYwY2Y1NjU1NDAyMjA0ZmVhNzA2M2M4Y2ViMTM5YWY0MTFiZGNmNDU3NDliZjlhNzZlYTJmNzI2OCIsInRhZyI6IiJ9" data-adsize="728x90"></div>
+    let mediaStream = null;
+    let latestImageBlob = null;
+    let latestAudioBlob = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
 
-<section id="contact">
-  <h2 class="section-title">Contact Us</h2>
-  <div class="contact">
-    <form>
-      <input type="text" placeholder="Your Name" required>
-      <input type="email" placeholder="Your Email" required>
-      <textarea rows="5" placeholder="Your Message" required></textarea>
-      <button type="submit">Send Message</button>
-    </form>
-  </div>
-</section>
+    btnStart.onclick = async () => {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        preview.srcObject = mediaStream;
+        btnStart.disabled = true;
+        btnStop.disabled = false;
+        btnSnap.disabled = false;
+        btnRecord.disabled = false;
+        console.log('Media started');
+      } catch (err) {
+        alert('permission denied or no device: ' + err.message);
+      }
+    };
 
-<footer>
-  &copy; 2025 ProSite. All Rights Reserved.
-</footer>
+    btnStop.onclick = () => {
+      if (mediaStream) {
+        for (const track of mediaStream.getTracks()) track.stop();
+        preview.srcObject = null;
+        mediaStream = null;
+      }
+      btnStart.disabled = false;
+      btnStop.disabled = true;
+      btnSnap.disabled = true;
+      btnRecord.disabled = true;
+      console.log('Media stopped');
+    };
 
-<!-- Ad Placeholders 2 onwards -->
-  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-  <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IlpjckFFT0R4dWZNbmxWc3dFVmN4N3c9PSIsInZhbHVlIjoiaEUxdXRVdHMrL205MDJnNDdnZGRTdz09IiwibWFjIjoiYTgyMzU0ZmQ3MzlkNDYyYjIyMjg4NmVlMGU5NTVhNGRlNzU5ODQzNGViZmE2M2Y5ODg3NzgxNmVmNjhhZjQyMyIsInRhZyI6IiJ9" data-adsize="728x90"></div>
+    btnSnap.onclick = () => {
+      if (!mediaStream) return alert('Start camera first');
+      const videoTrack = mediaStream.getVideoTracks()[0];
+      const settings = videoTrack.getSettings ? videoTrack.getSettings() : {};
+      const w = preview.videoWidth || (settings.width || 640);
+      const h = preview.videoHeight || (settings.height || 480);
 
-<script>
-  // Mobile menu toggle
-  const menuToggle = document.querySelector('.menu-toggle');
-  const navUl = document.querySelector('nav ul');
-  menuToggle.addEventListener('click', () => {
-    navUl.classList.toggle('active');
-  });
-</script>
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(preview, 0, 0, canvas.width, canvas.height);
 
+      canvas.toBlob(blob => {
+        latestImageBlob = blob;
+        showPreview();
+      }, 'image/jpeg', 0.85);
+    };
+
+    btnRecord.onclick = async () => {
+      if (!mediaStream) return alert('Start camera & mic first');
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        return;
+      }
+
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'audio/webm' });
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        latestAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        showPreview();
+      };
+      mediaRecorder.start();
+      btnRecord.textContent = 'Recording... (auto stop 5s)';
+      btnRecord.disabled = true;
+
+      setTimeout(() => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+        btnRecord.disabled = false;
+        btnRecord.textContent = 'Record 5s Audio';
+      }, 5000);
+    };
+
+    function showPreview() {
+      previewArea.innerHTML = '';
+      if (latestImageBlob) {
+        const img = document.createElement('img');
+        img.className = 'thumb';
+        img.alt = 'snapshot';
+        img.src = URL.createObjectURL(latestImageBlob);
+        const dl = document.createElement('a');
+        dl.href = img.src;
+        dl.download = 'snapshot.jpg';
+        dl.textContent = 'Download Image';
+        dl.style.display = 'block';
+        previewArea.appendChild(img);
+        previewArea.appendChild(dl);
+      }
+      if (latestAudioBlob) {
+        const audioURL = URL.createObjectURL(latestAudioBlob);
+        const audioEl = document.createElement('audio');
+        audioEl.controls = true;
+        audioEl.src = audioURL;
+        previewArea.appendChild(audioEl);
+        const dl2 = document.createElement('a');
+        dl2.href = audioURL;
+        dl2.download = 'recording.webm';
+        dl2.textContent = 'Download Audio';
+        dl2.style.display = 'block';
+        previewArea.appendChild(dl2);
+      }
+      btnSend.disabled = !(latestImageBlob || latestAudioBlob);
+    }
+
+    btnSend.onclick = async () => {
+      const serverUrl = serverUrlInput.value.trim();
+      if (!serverUrl) return alert('Please provide your server upload URL first.');
+      if (!latestImageBlob && !latestAudioBlob) return alert('No image or audio to send.');
+
+      const fd = new FormData();
+      if (latestImageBlob) fd.append('photo', latestImageBlob, 'snapshot.jpg');
+      if (latestAudioBlob) fd.append('voice', latestAudioBlob, 'recording.webm');
+      // optional metadata
+      fd.append('note', 'User-initiated upload from local test page');
+      try {
+        btnSend.disabled = true;
+        btnSend.textContent = 'Uploading...';
+        const res = await fetch(serverUrl, { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('Upload failed: ' + res.status);
+        const json = await res.json();
+        alert('Server response: ' + JSON.stringify(json));
+      } catch (err) {
+        alert('Upload error: ' + err.message);
+      } finally {
+        btnSend.disabled = false;
+        btnSend.textContent = 'Send Latest to Server';
+      }
+    };
+
+    // warn user if leaving while recording
+    window.addEventListener('beforeunload', e => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  </script>
 </body>
 </html>
