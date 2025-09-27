@@ -3,39 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Motion Detector (Hacker Style, Video, Location, Messages)</title>
+    <title>ProSecure - Advanced Security Monitoring System</title>
     <style>
-        body {
-            font-family: monospace;
-            background-color: #000;
-            color: #0f0;
-            text-align: center;
+        * {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ff41;
+            overflow-x: hidden;
             min-height: 100vh;
-        }
-        h1 {
-            margin-top: 10px;
-            font-size: 1.8em;
-            text-shadow: 0 0 5px #0f0;
-        }
-        #container {
             position: relative;
-            width: 95%;
-            max-width: 800px;
-            margin: 15px auto;
-            border: 2px solid #0f0;
-            box-shadow: 0 0 15px #0f0;
-            background-color: #111;
         }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(0, 255, 65, 0.3);
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #00ff41;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            color: #66ff66;
+            opacity: 0.8;
+        }
+
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .video-container {
+            flex: 2;
+            min-width: 300px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
+        }
+
         #videoElement {
             width: 100%;
+            height: auto;
             display: block;
+            filter: brightness(1.1) contrast(1.2) saturate(1.1);
         }
+
         #overlayCanvas {
             position: absolute;
             top: 0;
@@ -44,459 +102,1111 @@
             height: 100%;
             pointer-events: none;
         }
-        #status {
-            margin-top: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            padding: 10px;
-            background-color: rgba(0, 255, 0, 0.1);
-            border-radius: 5px;
-            width: 80%;
-            max-width: 700px;
-            margin-bottom: 20px;
-            min-height: 30px;
-        }
-        .motion-detected {
-            box-shadow: 0 0 20px #ff0000 !important;
-            animation: flicker 0.7s infinite alternate;
-        }
-        @keyframes flicker {
-            from { opacity: 1; }
-            to { opacity: 0.7; }
-        }
-        .roi-box {
+
+        .recording-indicators {
             position: absolute;
-            border: 2px dashed #0f0;
-            box-sizing: border-box;
-        }
-        .alert-message {
-            color: #ff0; /* Yellow for alerts */
-            font-weight: bolder;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .error-message {
-            color: red;
-            font-weight: bolder;
-        }
-        .recording-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: red;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
             z-index: 10;
-            opacity: 0.8;
-            animation: blink 1s infinite;
         }
-        @keyframes blink {
-            0% { opacity: 0.8; }
+
+        .indicator {
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.9em;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .indicator.video-rec {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        .indicator.audio-rec {
+            background: linear-gradient(45deg, #4444ff, #0000cc);
+            color: white;
+            animation: pulse-blue 1.5s infinite;
+        }
+
+        .indicator.motion-detected {
+            background: linear-gradient(45deg, #ffaa00, #ff6600);
+            color: white;
+            animation: pulse-orange 1s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        @keyframes pulse-blue {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+        .control-panel {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
+        }
+
+        .status-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #00ff41;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #status {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1em;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            word-break: break-word;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: #66ff66;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #00ff41;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ff41, #00cc33);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #00cc33, #009926);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .motion-alert {
+            animation: motion-flash 0.5s infinite alternate;
+        }
+
+        @keyframes motion-flash {
+            from { 
+                border-color: #00ff41; 
+                box-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
+            }
+            to { 
+                border-color: #ff0000; 
+                box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+            }
+        }
+
+        .error-message {
+            color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+            border-color: #ff4444;
+        }
+
+        .alert-message {
+            color: #ffaa00;
+            background: rgba(255, 170, 0, 0.1);
+            border-color: #ffaa00;
+            animation: alert-pulse 1s infinite;
+        }
+
+        @keyframes alert-pulse {
+            0%, 100% { opacity: 0.8; }
             50% { opacity: 1; }
-            100% { opacity: 0.8; }
+        }
+
+        .success-message {
+            color: #44ff44;
+            background: rgba(68, 255, 68, 0.1);
+            border-color: #44ff44;
+        }
+
+        .location-info {
+            background: rgba(0, 100, 255, 0.1);
+            border: 1px solid #0066ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .location-info a {
+            color: #66aaff;
+            text-decoration: none;
+        }
+
+        .location-info a:hover {
+            color: #99ccff;
+            text-decoration: underline;
+        }
+
+        /* ROI styling */
+        .roi-info {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .config-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 255, 65, 0.3);
+        }
+
+        .config-item {
+            margin-bottom: 15px;
+        }
+
+        .config-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #66ff66;
+            font-size: 0.9em;
+        }
+
+        .config-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ff41;
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: #00ff41;
+            font-family: inherit;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #66ff66;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
         }
     </style>
 </head>
 <body>
-    <h1>>_ Advanced Security Feed</h1>
-    <div id="container">
-        <video id="videoElement" autoplay muted playsinline></video>
-        <canvas id="overlayCanvas"></canvas>
-        <div id="recordingIndicator" class="recording-indicator" style="display: none;">RECORDING</div>
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="header">
+        <h1>🛡️ ProSecure Monitor</h1>
+        <div class="subtitle">Advanced Security & Surveillance System</div>
     </div>
-    <div id="status">Initializing System...</div>
+
+    <div class="main-container">
+        <div class="video-container">
+            <video id="videoElement" autoplay muted playsinline></video>
+            <canvas id="overlayCanvas"></canvas>
+            
+            <div class="recording-indicators">
+                <div id="videoIndicator" class="indicator video-rec">
+                    <span>🔴</span>
+                    <span>VIDEO</span>
+                </div>
+                <div id="audioIndicator" class="indicator audio-rec">
+                    <span>🎙️</span>
+                    <span>AUDIO</span>
+                </div>
+                <div id="motionIndicator" class="indicator motion-detected">
+                    <span>⚠️</span>
+                    <span>MOTION</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div class="status-section">
+                <div class="section-title">System Status</div>
+                <div id="status">Initializing ProSecure System...</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Motion Events</div>
+                        <div class="stat-value" id="motionCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Images Sent</div>
+                        <div class="stat-value" id="imageCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Videos Sent</div>
+                        <div class="stat-value" id="videoCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Audio Clips</div>
+                        <div class="stat-value" id="audioCount">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Uptime</div>
+                        <div class="stat-value" id="uptime">00:00:00</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Connection</div>
+                        <div class="stat-value" id="connectionStatus">Online</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="location-info" id="locationInfo">
+                <div class="stat-label">📍 Current Location</div>
+                <div id="locationData">Acquiring GPS coordinates...</div>
+            </div>
+
+            <div class="roi-info">
+                <div class="stat-label">🎯 Active Surveillance Zones</div>
+                <div id="roiStatus">3 zones configured and monitoring</div>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="manualSnapshot()">📷 Capture</button>
+                <button class="btn" onclick="manualVideoRecord()">🎥 Record</button>
+                <button class="btn" onclick="manualAudioRecord()">🎙️ Audio</button>
+                <button class="btn" onclick="sendLocation()">📍 Location</button>
+                <button class="btn" onclick="sendDeviceInfo()">💻 Device Info</button>
+            </div>
+
+            <div class="config-section">
+                <div class="section-title">Configuration</div>
+                <div class="config-item">
+                    <label class="config-label">Telegram Bot Token:</label>
+                    <input type="text" class="config-input" id="botToken" placeholder="Enter your bot token" value="8231147249:AAGnds85ugja4nc2VdhXdN1tvQGkMq02wyk">
+                </div>
+                <div class="config-item">
+                    <label class="config-label">Chat ID:</label>
+                    <input type="text" class="config-input" id="chatId" placeholder="Enter your chat ID" value="8101021767">
+                </div>
+                <button class="btn" onclick="updateConfig()" style="width: 100%; margin-top: 10px;">💾 Update Config</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // !!! IMPORTANT: REPLACE WITH YOUR ACTUAL TELEGRAM BOT TOKEN AND CHAT ID !!!
-        const TELEGRAM_BOT_TOKEN = '8231147249:AAGnds85ugja4nc2VdhXdN1tvQGkMq02wyk'; // e.g., '1234567890:ABCDefGhIJKLmNoPqRsTuVwXyZ'
-        const CHAT_ID = '8101021767'; // e.g., '1234567890'
+        // Configuration variables
+        let TELEGRAM_BOT_TOKEN = '8231147249:AAGnds85ugja4nc2VdhXdN1tvQGkMq02wyk';
+        let CHAT_ID = '8101021767';
 
+        // System elements
         const video = document.getElementById('videoElement');
         const overlayCanvas = document.getElementById('overlayCanvas');
         const overlayCtx = overlayCanvas.getContext('2d');
         const statusDiv = document.getElementById('status');
-        const recordingIndicator = document.getElementById('recordingIndicator');
 
-        let previousFrame = null;
-        const motionThreshold = 25;
-        const motionPercentageThreshold = 4;
-        const motionAlertCooldown = 5000;      // Cooldown between sending motion alerts (image + video)
-        const periodicSnapshotInterval = 60000; // Send snapshot + status every 60 seconds (1 minute)
-        const locationUpdateInterval = 60000 * 5; // 5 minutes
-        const deviceInfoUpdateInterval = 60000 * 30; // 30 minutes
-        const videoRecordDuration = 10000;     // 10 seconds for video recording
+        // Indicators
+        const videoIndicator = document.getElementById('videoIndicator');
+        const audioIndicator = document.getElementById('audioIndicator');
+        const motionIndicator = document.getElementById('motionIndicator');
 
-        let lastMotionAlertTime = 0;
-        let lastPeriodicSnapshotTime = 0;
-        let isProcessing = false;
-        let isRecording = false;
-        let lastKnownLocation = null;
-        let mediaRecorder = null;
-        let recordedBlobs = [];
-        let activeStream = null; // To hold the media stream
+        // Statistics
+        const stats = {
+            motionEvents: 0,
+            imagesSent: 0,
+            videosSent: 0,
+            audioClips: 0,
+            startTime: Date.now()
+        };
 
-        const roisConfig = [
-            { x1: 0.1, y1: 0.1, x2: 0.4, y2: 0.4, id: 'Entryway' },
-            { x1: 0.6, y1: 0.1, x2: 0.9, y2: 0.4, id: 'WindowArea' },
-            { x1: 0.3, y1: 0.6, x2: 0.7, y2: 0.9, id: 'Hallway' }
+        // System settings
+        const settings = {
+            motionThreshold: 25,
+            motionPercentageThreshold: 3,
+            motionCooldown: 8000,
+            periodicSnapshot: 30000,
+            locationUpdate: 300000,
+            deviceInfoUpdate: 1800000,
+            videoRecordDuration: 15000,
+            audioRecordInterval: 10000,
+            maxVideoSize: 45
+        };
+
+        // ROI Configuration (enhanced zones)
+        const surveillanceZones = [
+            { x1: 0.05, y1: 0.05, x2: 0.45, y2: 0.45, id: 'Entry Zone', color: '#00ff41', priority: 'HIGH' },
+            { x1: 0.55, y1: 0.05, x2: 0.95, y2: 0.45, id: 'Window Area', color: '#ffff00', priority: 'MEDIUM' },
+            { x1: 0.25, y1: 0.55, x2: 0.75, y2: 0.95, id: 'Main Hall', color: '#0080ff', priority: 'MEDIUM' }
         ];
 
-        function updateStatus(message, isError = false, isAlert = false) {
-            statusDiv.textContent = `>_ ${message}`;
-            statusDiv.className = '';
-            if (isError) {
-                statusDiv.classList.add('error-message');
-                console.error(`Error: ${message}`);
-            } else if (isAlert) {
-                statusDiv.classList.add('alert-message');
-                console.log(`Alert: ${message}`);
-            } else {
-                console.log(`Status: ${message}`);
+        // System state
+        let systemState = {
+            isProcessing: false,
+            isRecordingVideo: false,
+            isRecordingAudio: false,
+            activeStream: null,
+            previousFrame: null,
+            lastMotionTime: 0,
+            lastSnapshotTime: 0,
+            currentLocation: null,
+            mediaRecorder: null,
+            audioRecorder: null,
+            recordedBlobs: [],
+            audioBlobs: []
+        };
+
+        // Initialize particles background
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
             }
         }
 
-        async function startCameraAndMicrophone() {
-            updateStatus("Requesting camera and microphone access...");
+        // Update system statistics
+        function updateStats() {
+            document.getElementById('motionCount').textContent = stats.motionEvents;
+            document.getElementById('imageCount').textContent = stats.imagesSent;
+            document.getElementById('videoCount').textContent = stats.videosSent;
+            document.getElementById('audioCount').textContent = stats.audioClips;
+            
+            const uptime = Date.now() - stats.startTime;
+            const hours = Math.floor(uptime / 3600000);
+            const minutes = Math.floor((uptime % 3600000) / 60000);
+            const seconds = Math.floor((uptime % 60000) / 1000);
+            document.getElementById('uptime').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('connectionStatus').textContent = navigator.onLine ? 'Online' : 'Offline';
+        }
+
+        // Enhanced status update function
+        function updateStatus(message, type = 'normal') {
+            const timestamp = new Date().toLocaleTimeString();
+            statusDiv.textContent = `[${timestamp}] ${message}`;
+            statusDiv.className = '';
+            
+            switch (type) {
+                case 'error':
+                    statusDiv.classList.add('error-message');
+                    console.error(`Error: ${message}`);
+                    break;
+                case 'alert':
+                    statusDiv.classList.add('alert-message');
+                    console.warn(`Alert: ${message}`);
+                    break;
+                case 'success':
+                    statusDiv.classList.add('success-message');
+                    console.log(`Success: ${message}`);
+                    break;
+                default:
+                    console.log(`Status: ${message}`);
+            }
+        }
+
+        // Enhanced camera initialization
+        async function initializeCameraSystem() {
+            updateStatus("🚀 Initializing high-definition camera system...");
+            
             try {
-                activeStream = await navigator.mediaDevices.getUserMedia({
+                const constraints = {
                     video: {
                         facingMode: "environment",
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        width: { ideal: 1920, min: 1280 },
+                        height: { ideal: 1080, min: 720 },
+                        frameRate: { ideal: 30, min: 15 }
                     },
                     audio: {
-                        sampleRate: 44100, // Common sample rate
-                        channelCount: 2 // Stereo
+                        sampleRate: 48000,
+                        channelCount: 2,
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
                     }
-                });
+                };
 
-                video.srcObject = activeStream;
+                systemState.activeStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = systemState.activeStream;
 
                 video.onloadedmetadata = () => {
                     overlayCanvas.width = video.videoWidth;
                     overlayCanvas.height = video.videoHeight;
-                    drawROIs();
-                    updateStatus("System Initialized. Monitoring...");
-                    requestAnimationFrame(processFrame);
+                    drawSurveillanceZones();
+                    updateStatus("✅ ProSecure system online - Monitoring active", 'success');
+                    startMonitoring();
+                    startAudioRecording();
                 };
+
                 video.onerror = (e) => {
-                    updateStatus("Video playback error.", true);
+                    updateStatus("❌ Video system error detected", 'error');
                     console.error("Video Error:", e);
                 };
+
             } catch (err) {
-                let errorMessage = `Access denied or unavailable.`;
-                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                    errorMessage = `Permissions denied. Please enable camera, microphone, and location in your browser settings.`;
-                } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-                    errorMessage = `No camera or microphone found.`;
-                } else if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
-                    errorMessage = `Browser constraints could not be met (e.g., resolution). Try again or check browser settings.`;
+                let errorMessage = "❌ System initialization failed";
+                
+                if (err.name === 'NotAllowedError') {
+                    errorMessage = "❌ Camera/microphone access denied. Please enable permissions.";
+                } else if (err.name === 'NotFoundError') {
+                    errorMessage = "❌ No camera or microphone detected.";
+                } else if (err.name === 'OverconstrainedError') {
+                    errorMessage = "❌ Camera settings not supported. Trying fallback...";
+                    // Try with lower constraints
+                    setTimeout(() => initializeFallbackCamera(), 2000);
                 } else {
-                    errorMessage = `Error: ${err.message}`;
+                    errorMessage = `❌ System error: ${err.message}`;
                 }
-                updateStatus(`Failed to start media: ${errorMessage}`, true);
-                console.error("getUserMedia Error:", err);
+                
+                updateStatus(errorMessage, 'error');
+                console.error("Camera initialization error:", err);
             }
         }
 
-        function drawROIs() {
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            for (const roi of roisConfig) {
-                const x1 = roi.x1 * overlayCanvas.width;
-                const y1 = roi.y1 * overlayCanvas.height;
-                const x2 = roi.x2 * overlayCanvas.width;
-                const y2 = roi.y2 * overlayCanvas.height;
+        // Fallback camera with lower quality
+        async function initializeFallbackCamera() {
+            try {
+                const fallbackConstraints = {
+                    video: {
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 },
+                        frameRate: { ideal: 15, min: 10 }
+                    },
+                    audio: true
+                };
 
-                overlayCtx.strokeStyle = '#0f0';
-                overlayCtx.lineWidth = 2;
-                overlayCtx.setLineDash([5, 3]);
+                systemState.activeStream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                video.srcObject = systemState.activeStream;
+                updateStatus("⚠️ Running with reduced quality settings", 'alert');
+                
+                video.onloadedmetadata = () => {
+                    overlayCanvas.width = video.videoWidth;
+                    overlayCanvas.height = video.videoHeight;
+                    drawSurveillanceZones();
+                    startMonitoring();
+                    startAudioRecording();
+                };
+            } catch (err) {
+                updateStatus("❌ Complete camera system failure", 'error');
+            }
+        }
+
+        // Enhanced surveillance zone drawing
+        function drawSurveillanceZones() {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            surveillanceZones.forEach((zone, index) => {
+                const x1 = zone.x1 * overlayCanvas.width;
+                const y1 = zone.y1 * overlayCanvas.height;
+                const x2 = zone.x2 * overlayCanvas.width;
+                const y2 = zone.y2 * overlayCanvas.height;
+
+                // Draw zone border
+                overlayCtx.strokeStyle = zone.color;
+                overlayCtx.lineWidth = 3;
+                overlayCtx.setLineDash([8, 4]);
                 overlayCtx.strokeRect(x1, y1, x2 - x1, y2 - y1);
                 overlayCtx.setLineDash([]);
 
-                overlayCtx.font = '12px monospace';
-                overlayCtx.fillStyle = '#0f0';
-                overlayCtx.shadowColor = 'rgba(0, 255, 0, 0.5)';
+                // Draw zone label background
+                overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                overlayCtx.fillRect(x1, y1 - 25, 150, 25);
+
+                // Draw zone label
+                overlayCtx.font = 'bold 12px monospace';
+                overlayCtx.fillStyle = zone.color;
+                overlayCtx.shadowColor = zone.color;
                 overlayCtx.shadowBlur = 5;
-                overlayCtx.fillText(roi.id, x1 + 8, y1 + 18);
+                overlayCtx.fillText(`${zone.id} [${zone.priority}]`, x1 + 8, y1 - 8);
                 overlayCtx.shadowBlur = 0;
-            }
+
+                // Draw corner indicators
+                const cornerSize = 15;
+                overlayCtx.fillStyle = zone.color;
+                overlayCtx.fillRect(x1 - 2, y1 - 2, cornerSize, 4);
+                overlayCtx.fillRect(x1 - 2, y1 - 2, 4, cornerSize);
+                overlayCtx.fillRect(x2 - cornerSize + 2, y1 - 2, cornerSize, 4);
+                overlayCtx.fillRect(x2 - 2, y1 - 2, 4, cornerSize);
+            });
         }
 
+        // Enhanced motion detection
+        function detectMotionInZones(currentFrame, previousFrame) {
+            if (!previousFrame) return false;
+
+            let motionDetected = false;
+            let activeZones = [];
+
+            surveillanceZones.forEach((zone) => {
+                const roiX1 = Math.floor(overlayCanvas.width * zone.x1);
+                const roiY1 = Math.floor(overlayCanvas.height * zone.y1);
+                const roiWidth = Math.floor(overlayCanvas.width * (zone.x2 - zone.x1));
+                const roiHeight = Math.floor(overlayCanvas.height * (zone.y2 - zone.y1));
+
+                let motionPixels = 0;
+                const totalPixels = roiWidth * roiHeight;
+
+                // Sample pixels for performance (check every 4th pixel)
+                for (let y = 0; y < roiHeight; y += 2) {
+                    for (let x = 0; x < roiWidth; x += 2) {
+                        const currentIndex = ((roiY1 + y) * overlayCanvas.width + (roiX1 + x)) * 4;
+                        const currentPixel = currentFrame.data[currentIndex];
+                        const previousPixel = previousFrame.data[currentIndex];
+                        
+                        if (Math.abs(currentPixel - previousPixel) > settings.motionThreshold) {
+                            motionPixels++;
+                        }
+                    }
+                }
+
+                const motionPercentage = (motionPixels / (totalPixels / 4)) * 100;
+
+                if (motionPercentage > settings.motionPercentageThreshold) {
+                    motionDetected = true;
+                    activeZones.push(zone.id);
+                    
+                    // Highlight active zone
+                    overlayCtx.strokeStyle = '#ff0000';
+                    overlayCtx.lineWidth = 4;
+                    overlayCtx.strokeRect(roiX1, roiY1, roiWidth, roiHeight);
+                    
+                    // Add motion intensity indicator
+                    const intensity = Math.min(motionPercentage / 20, 1);
+                    overlayCtx.fillStyle = `rgba(255, 0, 0, ${intensity * 0.3})`;
+                    overlayCtx.fillRect(roiX1, roiY1, roiWidth, roiHeight);
+                }
+            });
+
+            if (motionDetected) {
+                updateStatus(`⚠️ MOTION DETECTED in zones: ${activeZones.join(', ')}`, 'alert');
+            }
+
+            return motionDetected;
+        }
+
+        // Enhanced frame processing
+        async function processFrame() {
+            if (systemState.isProcessing) {
+                requestAnimationFrame(processFrame);
+                return;
+            }
+
+            systemState.isProcessing = true;
+
+            // Clear overlay and redraw zones
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            overlayCtx.drawImage(video, 0, 0, overlayCanvas.width, overlayCanvas.height);
+            drawSurveillanceZones();
+
+            // Get grayscale frame data for motion detection
+            const currentFrame = getGrayscaleImageData(overlayCtx, 0, 0, overlayCanvas.width, overlayCanvas.height);
+
+            // Detect motion
+            let motionDetected = false;
+            if (systemState.previousFrame) {
+                motionDetected = detectMotionInZones(currentFrame, systemState.previousFrame);
+            }
+
+            const currentTime = Date.now();
+
+            if (motionDetected) {
+                // Show motion indicator
+                motionIndicator.style.display = 'flex';
+                video.parentElement.classList.add('motion-alert');
+                stats.motionEvents++;
+                
+                // Handle motion alert with cooldown
+                if (currentTime - systemState.lastMotionTime > settings.motionCooldown) {
+                    await handleMotionAlert();
+                    systemState.lastMotionTime = currentTime;
+                }
+            } else {
+                // Hide motion indicator
+                motionIndicator.style.display = 'none';
+                video.parentElement.classList.remove('motion-alert');
+            }
+
+            // Periodic snapshot
+            if (currentTime - systemState.lastSnapshotTime > settings.periodicSnapshot) {
+                await captureAndSendSnapshot(false);
+                systemState.lastSnapshotTime = currentTime;
+            }
+
+            systemState.previousFrame = currentFrame;
+            systemState.isProcessing = false;
+            requestAnimationFrame(processFrame);
+        }
+
+        // Get grayscale image data for motion detection
         function getGrayscaleImageData(ctx, x, y, width, height) {
             const imageData = ctx.getImageData(x, y, width, height);
             const data = imageData.data;
+            
             for (let i = 0; i < data.length; i += 4) {
                 const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                data[i] = avg;
-                data[i + 1] = avg;
-                data[i + 2] = avg;
+                data[i] = avg;     // Red
+                data[i + 1] = avg; // Green
+                data[i + 2] = avg; // Blue
+                // Alpha channel (data[i + 3]) remains unchanged
             }
             return imageData;
         }
 
-        function detectMotionInROIs(currentFrame, previousFrame) {
-            if (!previousFrame) return false;
-
-            let overallMotionDetected = false;
-
-            for (const roi of roisConfig) {
-                const roiX1 = Math.floor(overlayCanvas.width * roi.x1);
-                const roiY1 = Math.floor(overlayCanvas.height * roi.y1);
-                const roiWidth = Math.floor(overlayCanvas.width * (roi.x2 - roi.x1));
-                const roiHeight = Math.floor(overlayCanvas.height * (roi.y2 - roi.y1));
-
-                let motionPixelsInRoi = 0;
-                const totalPixelsInRoi = roiWidth * roiHeight;
-
-                // Create a temporary ImageData for the ROI to avoid slicing large arrays repeatedly
-                const currentRoiImgData = new ImageData(roiWidth, roiHeight);
-                const previousRoiImgData = new ImageData(roiWidth, roiHeight);
-
-                // Copy pixel data for the ROI from the full frame to the ROI-specific ImageData
-                for (let y = 0; y < roiHeight; y++) {
-                    for (let x = 0; x < roiWidth; x++) {
-                        const currentPixelIndex = ((roiY1 + y) * overlayCanvas.width + (roiX1 + x)) * 4;
-                        const roiPixelIndex = (y * roiWidth + x) * 4;
-
-                        currentRoiImgData.data.set(currentFrame.data.slice(currentPixelIndex, currentPixelIndex + 4), roiPixelIndex);
-                        previousRoiImgData.data.set(previousFrame.data.slice(currentPixelIndex, currentPixelIndex + 4), roiPixelIndex);
-                    }
-                }
-
-                const currentRoiData = currentRoiImgData.data;
-                const previousRoiData = previousRoiImgData.data;
-
-                for (let i = 0; i < currentRoiData.length; i += 4) {
-                    const diff = Math.abs(currentRoiData[i] - previousRoiData[i]);
-                    if (diff > motionThreshold) {
-                        motionPixelsInRoi++;
-                    }
-                }
-
-                const motionPercentage = (motionPixelsInRoi / totalPixelsInRoi) * 100;
-
-                if (motionPercentage > motionPercentageThreshold) {
-                    overallMotionDetected = true;
-                    overlayCtx.strokeStyle = '#ff0000';
-                    overlayCtx.lineWidth = 3;
-                    overlayCtx.strokeRect(roiX1, roiY1, roiWidth, roiHeight);
-                    overlayCtx.strokeStyle = '#0f0';
-                    overlayCtx.lineWidth = 2;
-                }
+        // Handle motion alert
+        async function handleMotionAlert() {
+            updateStatus("🚨 SECURITY ALERT: Motion detected - Capturing evidence", 'alert');
+            
+            // Capture immediate snapshot
+            await captureAndSendSnapshot(true);
+            
+            // Start video recording
+            if (!systemState.isRecordingVideo) {
+                await startVideoRecording();
             }
-            return overallMotionDetected;
         }
 
-        async function processFrame() {
-            if (isProcessing) {
-                requestAnimationFrame(processFrame);
-                return;
-            }
-            isProcessing = true;
+        // Enhanced video recording
+        async function startVideoRecording() {
+            if (systemState.isRecordingVideo || !systemState.activeStream) return;
 
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawROIs();
-
-            const currentFrameGrayscale = getGrayscaleImageData(overlayCtx, 0, 0, overlayCanvas.width, overlayCanvas.height);
-
-            let motionDetectedThisFrame = false;
-            if (previousFrame) {
-                motionDetectedThisFrame = detectMotionInROIs(currentFrameGrayscale, previousFrame);
-            }
-
-            if (motionDetectedThisFrame) {
-                video.classList.add('motion-detected');
-                const currentTime = Date.now();
-
-                if (currentTime - lastMotionAlertTime > motionAlertCooldown) {
-                    updateStatus("MOTION DETECTED!", false, true);
-                    await captureAndSendImage(true); // Send snapshot immediately
-                    startRecording(); // Start recording video
-                    lastMotionAlertTime = currentTime;
-                }
-            } else {
-                video.classList.remove('motion-detected');
-                if (!statusDiv.classList.contains('error-message') && !statusDiv.classList.contains('alert-message')) {
-                    updateStatus("Monitoring...");
-                }
-            }
-
-            // Periodic Snapshot (independent of motion, but throttled)
-            const currentTime = Date.now();
-            if (currentTime - lastPeriodicSnapshotTime > periodicSnapshotInterval) {
-                updateStatus("Sending periodic status snapshot...");
-                await captureAndSendImage(false); // Send snapshot without "alert" flag
-                lastPeriodicSnapshotTime = currentTime;
-            }
-
-
-            previousFrame = currentFrameGrayscale;
-            isProcessing = false;
-            requestAnimationFrame(processFrame);
-        }
-
-        function showRecordingIndicator() {
-            recordingIndicator.style.display = 'block';
-        }
-
-        function hideRecordingIndicator() {
-            recordingIndicator.style.display = 'none';
-        }
-
-        async function startRecording() {
-            if (isRecording || !activeStream) return;
-
-            isRecording = true;
-            showRecordingIndicator();
-            updateStatus("Recording started...");
-            recordedBlobs = [];
-
-            // Try to find a suitable mime type for broad compatibility
-            // Common types: video/webm, video/mp4
-            // 'video/webm;codecs=vp8,opus' or 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'
-            const mimeType = 'video/webm;codecs=vp8,opus'; // VP8 for webm, Opus for audio
-            if (!MediaRecorder.isTypeSupported(mimeType)) {
-                const alternativeMimeType = 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'; // H.264/AAC for mp4
-                if (MediaRecorder.isTypeSupported(alternativeMimeType)) {
-                    mimeType = alternativeMimeType;
-                } else {
-                    updateStatus("Neither WebM nor MP4 recording is supported. Cannot record video.", true);
-                    isRecording = false;
-                    hideRecordingIndicator();
-                    return;
-                }
-            }
+            systemState.isRecordingVideo = true;
+            videoIndicator.style.display = 'flex';
+            systemState.recordedBlobs = [];
 
             try {
-                mediaRecorder = new MediaRecorder(activeStream, { mimeType: mimeType });
+                const options = {
+                    mimeType: 'video/webm;codecs=vp9,opus',
+                    videoBitsPerSecond: 2500000, // 2.5 Mbps for good quality
+                    audioBitsPerSecond: 128000   // 128 kbps for audio
+                };
 
-                mediaRecorder.ondataavailable = (event) => {
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'video/webm;codecs=vp8,opus';
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'video/mp4';
+                        delete options.videoBitsPerSecond;
+                        delete options.audioBitsPerSecond;
+                    }
+                }
+
+                systemState.mediaRecorder = new MediaRecorder(systemState.activeStream, options);
+
+                systemState.mediaRecorder.ondataavailable = (event) => {
                     if (event.data && event.data.size > 0) {
-                        recordedBlobs.push(event.data);
+                        systemState.recordedBlobs.push(event.data);
                     }
                 };
 
-                mediaRecorder.onstop = async () => {
-                    isRecording = false;
-                    hideRecordingIndicator();
-                    updateStatus("Recording stopped.");
-                    await sendRecordedVideo(); // Send the recorded video
+                systemState.mediaRecorder.onstop = async () => {
+                    systemState.isRecordingVideo = false;
+                    videoIndicator.style.display = 'none';
+                    await sendRecordedVideo();
                 };
 
-                mediaRecorder.start(videoRecordDuration); // Start recording, will stop after duration automatically if not stopped manually
+                systemState.mediaRecorder.start(1000); // Collect data every second
+                
+                // Stop recording after specified duration
                 setTimeout(() => {
-                    if (isRecording && mediaRecorder && mediaRecorder.state !== 'inactive') {
-                        mediaRecorder.stop();
+                    if (systemState.isRecordingVideo && systemState.mediaRecorder?.state !== 'inactive') {
+                        systemState.mediaRecorder.stop();
                     }
-                }, videoRecordDuration);
+                }, settings.videoRecordDuration);
+
+                updateStatus(`📹 Video recording started (${settings.videoRecordDuration/1000}s)`, 'success');
 
             } catch (error) {
-                updateStatus(`Error starting MediaRecorder: ${error.message}`, true);
-                console.error("MediaRecorder Error:", error);
-                isRecording = false;
-                hideRecordingIndicator();
+                systemState.isRecordingVideo = false;
+                videoIndicator.style.display = 'none';
+                updateStatus(`❌ Video recording failed: ${error.message}`, 'error');
             }
         }
 
+        // Send recorded video
         async function sendRecordedVideo() {
-            if (recordedBlobs.length === 0) {
-                updateStatus("No video data recorded.");
+            if (systemState.recordedBlobs.length === 0) {
+                updateStatus("⚠️ No video data to send", 'alert');
                 return;
             }
 
-            const videoBlob = new Blob(recordedBlobs, { type: mediaRecorder.mimeType });
-            const videoSizeMB = (videoBlob.size / 1024 / 1024).toFixed(2);
-            const MAX_TELEGRAM_SIZE_MB = 50; // Telegram bot file size limit
+            const videoBlob = new Blob(systemState.recordedBlobs, { 
+                type: systemState.mediaRecorder.mimeType || 'video/webm' 
+            });
+            
+            const sizeMB = (videoBlob.size / 1024 / 1024).toFixed(2);
 
-            if (videoBlob.size > MAX_TELEGRAM_SIZE_MB * 1024 * 1024) {
-                updateStatus(`Video too large (${videoSizeMB}MB). Telegram limit is ${MAX_TELEGRAM_SIZE_MB}MB. Skipping video send.`, true);
-                // Optionally, you could try to re-record with lower quality here
+            if (videoBlob.size > settings.maxVideoSize * 1024 * 1024) {
+                updateStatus(`❌ Video too large (${sizeMB}MB). Max: ${settings.maxVideoSize}MB`, 'error');
                 return;
             }
 
-            updateStatus(`Transmitting video (${videoSizeMB}MB)...`);
+            updateStatus(`📤 Transmitting video (${sizeMB}MB)...`);
 
             const formData = new FormData();
             formData.append('chat_id', CHAT_ID);
-            formData.append('caption', `ALERT: Motion detected! Recorded video (${videoSizeMB}MB). ${new Date().toLocaleString()}`);
-            formData.append('video', videoBlob, `motion_video_${Date.now()}.mp4`); // Use .mp4 extension, Telegram will re-encode if necessary
+            formData.append('caption', `🚨 SECURITY ALERT: Motion detected!\n📹 Video Evidence (${sizeMB}MB)\n⏰ ${new Date().toLocaleString()}\n📍 Location: ${systemState.currentLocation ? 'Available' : 'Acquiring...'}`);
+            formData.append('video', videoBlob, `security_video_${Date.now()}.webm`);
 
             try {
                 const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
                     method: 'POST',
                     body: formData,
                 });
+
                 const data = await response.json();
                 if (data.ok) {
-                    updateStatus("Recorded video sent successfully.");
+                    stats.videosSent++;
+                    updateStatus("✅ Security video transmitted successfully", 'success');
                 } else {
-                    updateStatus(`Telegram video transmission failed: ${data.description}`, true);
+                    updateStatus(`❌ Video transmission failed: ${data.description}`, 'error');
                 }
             } catch (error) {
-                updateStatus(`Network error sending video: ${error.message}`, true);
+                updateStatus(`❌ Network error sending video: ${error.message}`, 'error');
             }
         }
 
-        async function captureAndSendImage(isMotionAlert = false) {
-            if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN') {
-                updateStatus("Telegram bot token not configured.", true);
-                return;
+        // Start continuous audio recording
+        function startAudioRecording() {
+            if (!systemState.activeStream) return;
+
+            const recordAudio = async () => {
+                if (systemState.isRecordingAudio) return;
+
+                systemState.isRecordingAudio = true;
+                audioIndicator.style.display = 'flex';
+                systemState.audioBlobs = [];
+
+                try {
+                    const options = {
+                        mimeType: 'audio/webm;codecs=opus',
+                        audioBitsPerSecond: 128000
+                    };
+
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'audio/mp4';
+                        delete options.audioBitsPerSecond;
+                    }
+
+                    systemState.audioRecorder = new MediaRecorder(systemState.activeStream, options);
+
+                    systemState.audioRecorder.ondataavailable = (event) => {
+                        if (event.data && event.data.size > 0) {
+                            systemState.audioBlobs.push(event.data);
+                        }
+                    };
+
+                    systemState.audioRecorder.onstop = async () => {
+                        systemState.isRecordingAudio = false;
+                        audioIndicator.style.display = 'none';
+                        await sendAudioClip();
+                        
+                        // Schedule next recording
+                        setTimeout(recordAudio, 5000); // 5 second break between recordings
+                    };
+
+                    systemState.audioRecorder.start();
+                    
+                    // Stop after 10 seconds
+                    setTimeout(() => {
+                        if (systemState.audioRecorder?.state !== 'inactive') {
+                            systemState.audioRecorder.stop();
+                        }
+                    }, settings.audioRecordInterval);
+
+                } catch (error) {
+                    systemState.isRecordingAudio = false;
+                    audioIndicator.style.display = 'none';
+                    console.error("Audio recording error:", error);
+                    
+                    // Retry after delay
+                    setTimeout(recordAudio, 30000);
+                }
+            };
+
+            // Start first recording after 3 seconds
+            setTimeout(recordAudio, 3000);
+        }
+
+        // Send audio clip
+        async function sendAudioClip() {
+            if (systemState.audioBlobs.length === 0) return;
+
+            const audioBlob = new Blob(systemState.audioBlobs, { 
+                type: systemState.audioRecorder.mimeType || 'audio/webm' 
+            });
+
+            const sizeMB = (audioBlob.size / 1024 / 1024).toFixed(2);
+
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('caption', `🎙️ Audio monitoring - ${new Date().toLocaleString()}`);
+            formData.append('voice', audioBlob, `audio_${Date.now()}.webm`);
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVoice`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+                if (data.ok) {
+                    stats.audioClips++;
+                    console.log(`Audio clip sent successfully (${sizeMB}MB)`);
+                }
+            } catch (error) {
+                console.error("Audio transmission error:", error);
             }
-            if (!CHAT_ID || CHAT_ID === 'YOUR_CHAT_ID') {
-                updateStatus("Telegram chat ID not configured.", true);
+        }
+
+        // Enhanced image capture and send
+        async function captureAndSendSnapshot(isAlert = false) {
+            if (!TELEGRAM_BOT_TOKEN || !CHAT_ID) {
+                updateStatus("❌ Telegram configuration missing", 'error');
                 return;
             }
 
+            // Draw current frame to canvas
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             overlayCtx.drawImage(video, 0, 0, overlayCanvas.width, overlayCanvas.height);
-            drawROIs(); // Ensure ROIs are drawn on the captured image
+            drawSurveillanceZones();
+
+            // Add timestamp and system info overlay
+            addInfoOverlay(isAlert);
 
             overlayCanvas.toBlob(async (blob) => {
                 if (!blob) {
-                    updateStatus("Failed to create image blob for transmission.", true);
+                    updateStatus("❌ Failed to create image", 'error');
                     return;
                 }
 
                 const formData = new FormData();
                 formData.append('chat_id', CHAT_ID);
-                formData.append('caption', `Status Snapshot. ${isMotionAlert ? 'ALERT: Motion detected!' : ''} ${new Date().toLocaleString()}`);
+                
+                let caption = isAlert 
+                    ? `🚨 SECURITY ALERT: Motion detected!\n📸 Evidence Photo\n⏰ ${new Date().toLocaleString()}`
+                    : `📸 Periodic Status Report\n⏰ ${new Date().toLocaleString()}`;
+                
+                if (systemState.currentLocation) {
+                    caption += `\n📍 Location: Available`;
+                }
+                
+                caption += `\n📊 Stats: ${stats.motionEvents} alerts, ${stats.imagesSent} images sent`;
+                
+                formData.append('caption', caption);
                 formData.append('photo', blob, `snapshot_${Date.now()}.jpg`);
 
                 try {
-                    updateStatus("Transmitting snapshot...");
                     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
                         method: 'POST',
                         body: formData,
                     });
+
                     const data = await response.json();
                     if (data.ok) {
-                        if (isMotionAlert) {
-                            updateStatus("Motion alert image sent.");
-                        } else {
-                            updateStatus("Periodic snapshot sent.");
-                        }
+                        stats.imagesSent++;
+                        updateStatus(isAlert ? "✅ Alert image transmitted" : "✅ Status snapshot sent", 'success');
                     } else {
-                        updateStatus(`Telegram image transmission failed: ${data.description}`, true);
+                        updateStatus(`❌ Image transmission failed: ${data.description}`, 'error');
                     }
                 } catch (error) {
-                    updateStatus(`Network error sending image: ${error.message}`, true);
+                    updateStatus(`❌ Network error: ${error.message}`, 'error');
                 }
-            }, 'image/jpeg', 0.7); // Lower quality for potentially smaller file size
+            }, 'image/jpeg', 0.9); // High quality
         }
 
-        async function sendTelegramMessage(message) {
-            if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN') {
-                updateStatus("Telegram bot token not configured.", true);
+        // Add information overlay to image
+        function addInfoOverlay(isAlert) {
+            overlayCtx.font = 'bold 16px monospace';
+            overlayCtx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            overlayCtx.fillRect(0, overlayCanvas.height - 80, overlayCanvas.width, 80);
+            
+            overlayCtx.fillStyle = isAlert ? '#ff4444' : '#00ff41';
+            overlayCtx.shadowColor = overlayCtx.fillStyle;
+            overlayCtx.shadowBlur = 5;
+            
+            const timestamp = new Date().toLocaleString();
+            overlayCtx.fillText(`ProSecure ${isAlert ? 'ALERT' : 'Status'} - ${timestamp}`, 10, overlayCanvas.height - 50);
+            overlayCtx.fillText(`Motion Events: ${stats.motionEvents} | Images: ${stats.imagesSent} | Videos: ${stats.videosSent}`, 10, overlayCanvas.height - 25);
+            
+            overlayCtx.shadowBlur = 0;
+        }
+
+        // Enhanced location services
+        function updateLocationServices() {
+            if (!navigator.geolocation) {
+                updateStatus("❌ Geolocation not supported", 'error');
                 return;
             }
-            if (!CHAT_ID || CHAT_ID === 'YOUR_CHAT_ID') {
-                updateStatus("Telegram chat ID not configured.", true);
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    systemState.currentLocation = { latitude, longitude, accuracy };
+                    
+                    const locationData = `📍 ${latitude.toFixed(6)}, ${longitude.toFixed(6)} (±${accuracy.toFixed(0)}m)`;
+                    document.getElementById('locationData').innerHTML = 
+                        `${locationData}<br><a href="https://maps.google.com/?q=${latitude},${longitude}" target="_blank">🗺️ View on Map</a>`;
+                },
+                (error) => {
+                    updateStatus(`❌ Location error: ${error.message}`, 'error');
+                    document.getElementById('locationData').textContent = "Location unavailable";
+                },
+                options
+            );
+        }
+
+        // Send location update via Telegram
+        async function sendLocationUpdate() {
+            if (!systemState.currentLocation) {
+                updateLocationServices();
                 return;
+            }
+
+            const { latitude, longitude, accuracy } = systemState.currentLocation;
+            
+            const message = `📍 <b>Device Location Update</b>\n` +
+                          `🗺️ Coordinates: <code>${latitude.toFixed(6)}, ${longitude.toFixed(6)}</code>\n` +
+                          `🎯 Accuracy: <code>±${accuracy.toFixed(0)} meters</code>\n` +
+                          `⏰ Timestamp: <code>${new Date().toLocaleString()}</code>\n` +
+                          `🔗 <a href="https://maps.google.com/?q=${latitude},${longitude}">View on Google Maps</a>`;
+
+            await sendTelegramMessage(message);
+        }
+
+        // Enhanced device information
+        async function getDeviceInformation() {
+            let deviceInfo = `🖥️ <b>ProSecure System Status</b>\n\n`;
+            
+            // Basic device info
+            deviceInfo += `📱 Platform: <code>${navigator.platform}</code>\n`;
+            deviceInfo += `🌐 User Agent: <code>${navigator.userAgent.split(' ').slice(-2).join(' ')}</code>\n`;
+            deviceInfo += `💾 RAM: <code>${navigator.deviceMemory || 'Unknown'} GB</code>\n`;
+            deviceInfo += `⚡ CPU Cores: <code>${navigator.hardwareConcurrency || 'Unknown'}</code>\n`;
+            
+            // Network information
+            deviceInfo += `\n🌐 <b>Network Status:</b>\n`;
+            deviceInfo += `📶 Connection: <code>${navigator.onLine ? 'Online' : 'Offline'}</code>\n`;
+            
+            if (navigator.connection) {
+                const conn = navigator.connection;
+                deviceInfo += `📡 Type: <code>${conn.effectiveType || 'Unknown'}</code>\n`;
+                deviceInfo += `⬇️ Downlink: <code>${conn.downlink || 'Unknown'} Mbps</code>\n`;
+                deviceInfo += `⏱️ RTT: <code>${conn.rtt || 'Unknown'} ms</code>\n`;
+            }
+
+            // System statistics
+            const uptime = Date.now() - stats.startTime;
+            const hours = Math.floor(uptime / 3600000);
+            const minutes = Math.floor((uptime % 3600000) / 60000);
+            
+            deviceInfo += `\n📊 <b>System Statistics:</b>\n`;
+            deviceInfo += `⏰ Uptime: <code>${hours}h ${minutes}m</code>\n`;
+            deviceInfo += `🚨 Motion Events: <code>${stats.motionEvents}</code>\n`;
+            deviceInfo += `📸 Images Sent: <code>${stats.imagesSent}</code>\n`;
+            deviceInfo += `🎥 Videos Sent: <code>${stats.videosSent}</code>\n`;
+            deviceInfo += `🎙️ Audio Clips: <code>${stats.audioClips}</code>\n`;
+
+            // Camera information
+            if (video.videoWidth && video.videoHeight) {
+                deviceInfo += `\n📹 <b>Camera Status:</b>\n`;
+                deviceInfo += `🎬 Resolution: <code>${video.videoWidth}x${video.videoHeight}</code>\n`;
+                deviceInfo += `📊 Surveillance Zones: <code>${surveillanceZones.length} active</code>\n`;
+            }
+
+            await sendTelegramMessage(deviceInfo);
+        }
+
+        // Send Telegram message
+        async function sendTelegramMessage(message) {
+            if (!TELEGRAM_BOT_TOKEN || !CHAT_ID) {
+                updateStatus("❌ Telegram configuration missing", 'error');
+                return false;
             }
 
             const formData = new FormData();
@@ -509,129 +1219,119 @@
                     method: 'POST',
                     body: formData,
                 });
+
                 const data = await response.json();
-                if (!data.ok) {
-                    updateStatus(`Telegram message failed: ${data.description}`, true);
-                }
+                return data.ok;
             } catch (error) {
-                updateStatus(`Network error sending message: ${error.message}`, true);
+                updateStatus(`❌ Message send error: ${error.message}`, 'error');
+                return false;
             }
         }
 
-        function getLocationAndSend() {
-            if (!navigator.geolocation) {
-                sendTelegramMessage("Geolocation is not supported by this browser.");
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-
-                    const currentLocation = { latitude, longitude, accuracy };
-
-                    const significantChangeThreshold = 20; // meters
-                    let distChanged = false;
-                    if (lastKnownLocation) {
-                        const dist = await getDistanceFromLatLonInMeters(latitude, longitude, lastKnownLocation.latitude, lastKnownLocation.longitude);
-                        if (dist >= significantChangeThreshold) {
-                            distChanged = true;
-                        }
-                    } else {
-                        distChanged = true; // First time getting location
-                    }
-
-                    if (distChanged) {
-                        lastKnownLocation = currentLocation;
-                        const locationMessage = `<b>Device Location Update:</b>\n` +
-                                                `📍 Latitude: <code>${latitude.toFixed(6)}</code>\n` +
-                                                `📍 Longitude: <code>${longitude.toFixed(6)}</code>\n` +
-                                                `📏 Accuracy: <code>${accuracy.toFixed(0)}</code> meters\n` +
-                                                `🔗 <a href="https://maps.google.com/?q=${latitude},${longitude}">View on Map</a>`;
-                        await sendTelegramMessage(locationMessage);
-                    }
-                },
-                (error) => {
-                    sendTelegramMessage(`❌ Error getting location: ${error.message}`);
-                }
-            );
+        // Manual control functions
+        async function manualSnapshot() {
+            updateStatus("📸 Manual snapshot requested...");
+            await captureAndSendSnapshot(false);
         }
 
-        async function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // metres
-            const φ1 = lat1 * Math.PI / 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const d = R * c;
-            return d;
-        }
-
-        async function getAndSendDeviceInfo() {
-            let deviceInfo = "<u><b>Device & Network Status:</b></u>\n";
-            deviceInfo += `👤 User Agent: <code>${navigator.userAgent}</code>\n`;
-            deviceInfo += `💻 Platform: <code>${navigator.platform}</code>\n`;
-            deviceInfo += `🖥️ CPU Cores: <code>${navigator.hardwareConcurrency || 'N/A'}</code>\n`;
-            deviceInfo += `💾 RAM: <code>${navigator.deviceMemory || 'N/A'} GB</code>\n`;
-
-            deviceInfo += "\n🌐 Network Status:\n";
-            const connectionType = navigator.onLine ? 'Online' : 'Offline';
-            deviceInfo += `  - Connection: <b>${connectionType}</b>\n`;
-
-            if (navigator.connection) {
-                const connection = navigator.connection;
-                deviceInfo += `  - Type: <code>${connection.type || 'Unknown'}</code>\n`;
-                deviceInfo += `  - Effective Type: <code>${connection.effectiveType || 'Unknown'}</code>\n`;
-                deviceInfo += `  - Downlink: <code>${connection.downlink ? `${connection.downlink} Mbps` : 'Unknown'}</code>\n`;
-                deviceInfo += `  - RTT: <code>${connection.rtt ? `${connection.rtt} ms` : 'Unknown'}</code>\n`;
-                deviceInfo += `  - Save Data: ${connection.saveData ? '✅ Enabled' : '❌ Disabled'}\n`;
+        async function manualVideoRecord() {
+            if (!systemState.isRecordingVideo) {
+                updateStatus("🎥 Manual video recording started...");
+                await startVideoRecording();
             } else {
-                deviceInfo += `  - (Network Information API not supported)\n`;
+                updateStatus("⚠️ Video recording already in progress", 'alert');
             }
-            deviceInfo += `\n📈 Simulated Data Usage:\n`;
-            deviceInfo += `  - WiFi: <code>${Math.floor(Math.random() * 500)} MB</code>\n`;
-            deviceInfo += `  - Cellular: <code>${Math.floor(Math.random() * 200)} MB</code>\n`;
-
-            await sendTelegramMessage(deviceInfo);
         }
 
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            if (TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN' || CHAT_ID === 'YOUR_CHAT_ID') {
-                updateStatus("Please configure TELEGRAM_BOT_TOKEN and CHAT_ID in the script.", true);
-                return;
+        async function manualAudioRecord() {
+            updateStatus("🎙️ Manual audio capture...");
+            // Audio is continuously recording, so just send current info
+            await sendTelegramMessage(`🎙️ Audio monitoring is active\n⏰ ${new Date().toLocaleString()}\n📊 Total clips sent: ${stats.audioClips}`);
+        }
+
+        async function sendLocation() {
+            updateStatus("📍 Sending location update...");
+            await sendLocationUpdate();
+        }
+
+        async function sendDeviceInfo() {
+            updateStatus("💻 Sending device information...");
+            await getDeviceInformation();
+        }
+
+        // Update configuration
+        function updateConfig() {
+            const newBotToken = document.getElementById('botToken').value.trim();
+            const newChatId = document.getElementById('chatId').value.trim();
+            
+            if (newBotToken && newChatId) {
+                TELEGRAM_BOT_TOKEN = newBotToken;
+                CHAT_ID = newChatId;
+                updateStatus("✅ Configuration updated successfully", 'success');
+            } else {
+                updateStatus("❌ Please enter both Bot Token and Chat ID", 'error');
+            }
+        }
+
+        // Start monitoring
+        function startMonitoring() {
+            updateStatus("🔍 Starting surveillance monitoring...");
+            requestAnimationFrame(processFrame);
+            
+            // Start periodic tasks
+            setInterval(updateStats, 1000);
+            setInterval(updateLocationServices, settings.locationUpdate);
+            setInterval(getDeviceInformation, settings.deviceInfoUpdate);
+        }
+
+        // System cleanup
+        function cleanupSystem() {
+            if (systemState.activeStream) {
+                systemState.activeStream.getTracks().forEach(track => track.stop());
+            }
+            if (systemState.mediaRecorder?.state !== 'inactive') {
+                systemState.mediaRecorder.stop();
+            }
+            if (systemState.audioRecorder?.state !== 'inactive') {
+                systemState.audioRecorder.stop();
+            }
+            updateStatus("🛑 ProSecure system shutdown complete", 'alert');
+        }
+
+        // Initialize system on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            createParticles();
+            updateStatus("🚀 ProSecure system initializing...");
+            
+            // Validate configuration
+            if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN' || 
+                !CHAT_ID || CHAT_ID === 'YOUR_CHAT_ID') {
+                updateStatus("⚠️ Please configure Telegram Bot Token and Chat ID", 'alert');
             }
 
-            startCameraAndMicrophone();
-
-            // Initial sends
-            getLocationAndSend();
-            getAndSendDeviceInfo();
-            // Send an initial snapshot when ready
-            setTimeout(() => captureAndSendImage(false), 5000); // Send initial snapshot after a short delay
-
-            // Set up intervals
-            setInterval(getLocationAndSend, locationUpdateInterval);
-            setInterval(getAndSendDeviceInfo, deviceInfoUpdateInterval);
+            // Initialize camera system
+            await initializeCameraSystem();
+            
+            // Start location services
+            updateLocationServices();
+            
+            // Send initial system status
+            setTimeout(() => {
+                sendTelegramMessage(`🚀 <b>ProSecure System Activated</b>\n⏰ ${new Date().toLocaleString()}\n🛡️ Advanced security monitoring online\n📹 ${surveillanceZones.length} surveillance zones active`);
+            }, 5000);
         });
 
-        window.addEventListener('beforeunload', () => {
-            if (activeStream) {
-                activeStream.getTracks().forEach(track => track.stop()); // Stop all tracks
-            }
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-            }
-            console.log("Security system stopped.");
+        // Handle page unload
+        window.addEventListener('beforeunload', cleanupSystem);
+        
+        // Handle network status changes
+        window.addEventListener('online', () => {
+            updateStatus("🌐 Network connection restored", 'success');
         });
-
+        
+        window.addEventListener('offline', () => {
+            updateStatus("❌ Network connection lost", 'error');
+        });
     </script>
 </body>
 </html>
