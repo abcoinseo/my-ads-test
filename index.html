@@ -1,121 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Responsive AdsBitvex Site</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdsBitvex Responsive Site</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+  }
 
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+  header {
+    background-color: #1a1a1a;
+    color: #fff;
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 1.5rem;
+  }
 
-    header {
-      background-color: #1a1a1a;
-      color: #fff;
-      text-align: center;
-      padding: 20px 10px;
-      font-size: 1.5rem;
-    }
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
+    gap: 30px;
+  }
 
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 10px;
-      gap: 30px;
-    }
+  .content {
+    background-color: #fff;
+    max-width: 1200px;
+    width: 100%;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+  }
 
-    .content {
-      max-width: 1200px;
-      width: 100%;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      text-align: center;
-    }
+  /* Wrapper for AdsBitvex ad to keep system intact but responsive */
+  .ad-wrapper {
+    width: 100%;
+    max-width: 728px; /* desktop ad size */
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  }
 
-    /* Responsive ad container */
-    .MainAdverTiseMentDiv {
-      position: relative;
-      width: 100%;
-      max-width: 728px; /* desktop max size */
-      height: 90px; /* desktop height */
-      margin: 20px auto;
-      overflow: hidden;
-      border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    }
+  /* Let the ad system control its internal layout fully */
+  .ad-wrapper .MainAdverTiseMentDiv {
+    width: 100%;
+    height: auto;
+    min-height: 90px; /* maintain minimum height */
+  }
 
-    /* Make ad iframe fully responsive */
-    .MainAdverTiseMentDiv iframe,
-    .MainAdverTiseMentDiv > * {
-      width: 100% !important;
-      height: 100% !important;
-    }
+  footer {
+    background-color: #1a1a1a;
+    color: #fff;
+    text-align: center;
+    padding: 15px 10px;
+    font-size: 0.9rem;
+  }
 
-    footer {
-      background-color: #1a1a1a;
-      color: #fff;
-      text-align: center;
-      padding: 15px 10px;
-      font-size: 0.9rem;
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .ad-wrapper {
+      max-width: 100%;
     }
-
-    /* Mobile adjustments */
-    @media (max-width: 768px) {
-      header {
-        font-size: 1.2rem;
-        padding: 15px 10px;
-      }
-
-      .MainAdverTiseMentDiv {
-        height: 60px; /* smaller height for mobile */
-      }
-    }
-
-    @media (max-width: 480px) {
-      .MainAdverTiseMentDiv {
-        height: 50px; /* smallest mobile height */
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
-  <header>
-    AdsBitvex Responsive Ad Layout
-  </header>
+<header>
+  AdsBitvex Responsive Ad Layout
+</header>
 
-  <main>
-    <div class="content">
-      <h2>Professional Responsive Ads</h2>
-      <p>This ad container looks great on both desktop and mobile devices, keeping the ad size consistent and professional.</p>
+<main>
+  <div class="content">
+    <h2>Professional Responsive Ads</h2>
+    <p>This container keeps the AdsBitvex ad system exactly as it is while being fully responsive and professional.</p>
 
-      <!-- Ad Section -->
+    <!-- Ad Wrapper -->
+    <div class="ad-wrapper">
       <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IkJZMW9mZlRWMEZnVm50MXJHYUZoNVE9PSIsInZhbHVlIjoic2ZuWlRmc0NIOVE3Y0NNNEtRZGczQT09IiwibWFjIjoiOGZmYTgwYTRiYzQzNjdkYzFlOGNkYmMzNzYzNWMwNjRiMTAzNGU3ZTBmOTk2NTE4ZTNlMTY1Mzk1ZmI1Yjk2ZiIsInRhZyI6IiJ9" data-adsize="728x90"></div>
-
     </div>
-  </main>
 
-  <footer>
-    &copy; 2025 AdsBitvex Website. All Rights Reserved.
-  </footer>
+  </div>
+</main>
 
-  <!-- AdsBitvex Script -->
-  <script src="https://adsbitvex.site/assets/ads/ad.js" class="adScriptClass"></script>
+<footer>
+  &copy; 2025 AdsBitvex Website. All Rights Reserved.
+</footer>
+
+<!-- Keep AdsBitvex script exactly as is -->
+<script src="https://adsbitvex.site/assets/ads/ad.js" class="adScriptClass"></script>
 
 </body>
 </html>
