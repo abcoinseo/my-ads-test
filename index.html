@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Responsive Ads Website</title>
+  <title>Responsive AdsBitvex Site</title>
   <style>
-    /* Reset some default styles */
     * {
       margin: 0;
       padding: 0;
@@ -35,7 +34,7 @@
       flex-direction: column;
       align-items: center;
       padding: 20px 10px;
-      gap: 20px;
+      gap: 30px;
     }
 
     .content {
@@ -48,18 +47,23 @@
       text-align: center;
     }
 
-    /* Ad container responsive */
+    /* Responsive ad container */
     .MainAdverTiseMentDiv {
-      display: flex;
-      justify-content: center;
+      position: relative;
       width: 100%;
-      margin: 20px 0;
+      max-width: 728px; /* desktop max size */
+      height: 90px; /* desktop height */
+      margin: 20px auto;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     }
 
-    /* Make ad size responsive */
-    .MainAdverTiseMentDiv iframe {
-      max-width: 100%;
-      height: auto;
+    /* Make ad iframe fully responsive */
+    .MainAdverTiseMentDiv iframe,
+    .MainAdverTiseMentDiv > * {
+      width: 100% !important;
+      height: 100% !important;
     }
 
     footer {
@@ -70,18 +74,21 @@
       font-size: 0.9rem;
     }
 
+    /* Mobile adjustments */
     @media (max-width: 768px) {
       header {
         font-size: 1.2rem;
         padding: 15px 10px;
       }
 
-      main {
-        padding: 15px 5px;
+      .MainAdverTiseMentDiv {
+        height: 60px; /* smaller height for mobile */
       }
+    }
 
-      .content {
-        padding: 15px;
+    @media (max-width: 480px) {
+      .MainAdverTiseMentDiv {
+        height: 50px; /* smallest mobile height */
       }
     }
   </style>
@@ -89,14 +96,14 @@
 <body>
 
   <header>
-    Welcome to AdsBitvex Responsive Site
+    AdsBitvex Responsive Ad Layout
   </header>
 
   <main>
     <div class="content">
-      <h2>Professional Responsive Layout</h2>
-      <p>This is a sample responsive website for AdsBitvex ads. Works perfectly on both mobile and desktop devices.</p>
-      
+      <h2>Professional Responsive Ads</h2>
+      <p>This ad container looks great on both desktop and mobile devices, keeping the ad size consistent and professional.</p>
+
       <!-- Ad Section -->
       <div class='MainAdverTiseMentDiv' data-publisher="eyJpdiI6IkJZMW9mZlRWMEZnVm50MXJHYUZoNVE9PSIsInZhbHVlIjoic2ZuWlRmc0NIOVE3Y0NNNEtRZGczQT09IiwibWFjIjoiOGZmYTgwYTRiYzQzNjdkYzFlOGNkYmMzNzYzNWMwNjRiMTAzNGU3ZTBmOTk2NTE4ZTNlMTY1Mzk1ZmI1Yjk2ZiIsInRhZyI6IiJ9" data-adsize="728x90"></div>
 
