@@ -1,40 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sticky Ad Example</title>
-<style>
-  /* Sticky ad container */
-  .sticky-ad {
-    position: fixed;
-    bottom: 0; /* stick at bottom */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 360px; /* default ad width */
-    max-width: 100%; /* responsive */
-    z-index: 9999;
-    background: transparent;
-    text-align: center;
-  }
-
-  /* Responsive adjustments for smaller screens */
-  @media screen and (max-width: 400px) {
-    .sticky-ad {
-      width: 100%; /* full width on mobile */
-      padding: 0 5px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Ads Website</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
-  }
 
-  /* Optional: smooth slide-up effect */
-  .sticky-ad.show {
-    animation: slideUp 0.5s ease forwards;
-  }
+    header {
+      background: #007bff;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
 
-  @keyframes slideUp {
-    from { transform: translate(-50%, 100%); opacity: 0; }
-    to { transform: translate(-50%, 0); opacity: 1; }
-  }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .ad-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 728px;
+      margin: auto;
+      padding: 10px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    footer {
+      background: #222;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;
+      margin-top: auto;
+    }
+
+    /* Make ad responsive (mobile & pc same size 728x90) */
+    .MainAdverTiseMentDiv {
+      width: 100%;
+      max-width: 728px;
+      height: 90px;
+      margin: auto;
+    }
+
+    @media (max-width: 768px) {
+      .MainAdverTiseMentDiv {
+        width: 100%;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    My Responsive Ads Website
+  </header>
+
+  <main>
+    <div class="ad-container">
+      <div class='MainAdverTiseMentDiv'
+           data-publisher="eyJpdiI6ImRxVU1jWHFSNzM2Y09kWTZ4cmtQSXc9PSIsInZhbHVlIjoienJ0anBSZmxBY3BsNFpDak9xUFl1UT09IiwibWFjIjoiODBhYjFjZjE0NWU4OTlmNWI0ZjYzOWNjN2ViODVjMmE2OGJlZjQxOGY0NzZmZjA0MTRmNGYwYTBlOTc2OGFmNyIsInRhZyI6IiJ9"
+           data-adsize="728x90">
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 | Ads Website | All Rights Reserved
+  </footer>
+
+  <!-- Ads Script -->
+  <script src="https://adsbitvex.site/assets/ads/ad.js" class="adScriptClass"></script>
+
+</body>
+</html>  }
 </style>
 </head>
 <body>
